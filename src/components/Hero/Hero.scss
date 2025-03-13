@@ -1,0 +1,418 @@
+// CSS Future tip ✨: https://caniuse.com/mdn-css_at-rules_property
+@property --shift {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+:root {
+  overflow: hidden;
+  --labs-sys-color-background: #111;
+  --labs-sys-color-on-background: white;
+  --base-speed: 4s;
+
+  --labs-sys-color-grid: #fac4ff;
+  --labs-sys-color-grid-glow: #df7373;
+  --labs-sys-color-sun-1: #fdb428;
+  --labs-sys-color-sun-2: #f672ca;
+  --labs-sys-color-sun-glow: #b9f;
+
+  --labs-sys-color-star: #f6c0c0;
+
+  --labs-sys-color-triangle: #6eccee;
+}
+
+.top-lines {
+  background: linear-gradient(
+                  to bottom,
+                  var(--labs-sys-color-sun-2) .2vmin,
+                  transparent .2vmin,
+  );
+  background-size: 125rem .4vmin;
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: overlay;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.top {
+  padding-top: 4rem;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative;
+
+  // 🏔️
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: -0.5vmin;
+    left: 0;
+    right: 0;
+    background: #222;
+    height: 5vmin;
+    clip-path: polygon(
+                    0% 38%,
+                    2.6% 40%,
+                    5.4% 24%,
+                    8.7% 59%,
+                    13.6% 72%,
+                    18.5% 22%,
+                    21.7% 35%,
+                    27.2% 8%,
+                    34% 53%,
+                    39.4% 81%,
+                    49.1% 85%,
+                    54.5% 64%,
+                    60% 53%,
+                    71.4% 80%,
+                    73.4% 15%,
+                    79.8% 29%,
+                    86.5% 15%,
+                    94.1% 36%,
+                    100% 27%,
+                    100% 100%,
+                    0% 100%
+    );
+  }
+  // 🏔️
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: -1vmin;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    mix-blend-mode: soft-light;
+    height: 15vmin;
+    backdrop-filter: blur(20px);
+    // ⚙️ gen: https://unused-css.com/tools/clip-path-generator?p=22AwLgzAHANATAdANhAFmFArHZIbKhOAdhHQE4oBGMREQmSg9HemCo8dWQuGEaMbOjBQwpLHwpRkYin07pkcJgjwJQQqITa9CaQghq58bbGgjdZVKKUW8YhSsFBh6FJyDdpQngNx+AxE5BwEA
+    clip-path: polygon(
+                    0% 38%,
+                    2.6% 40%,
+                    5.4% 24%,
+                    8.7% 59%,
+                    13.6% 72%,
+                    18.5% 22%,
+                    21.7% 35%,
+                    27.2% 8%,
+                    34% 53%,
+                    39.4% 81%,
+                    49.1% 85%,
+                    54.5% 64%,
+                    60% 53%,
+                    71.2% 70%,
+                    76.6% 24%,
+                    81.4% 0%,
+                    87.1% 13%,
+                    94.2% 27%,
+                    100% 32%,
+                    100% 100%,
+                    0% 100%
+    );
+  }
+}
+
+.bottom-overlay {
+  perspective: 14.5rem;
+  flex: 0 0 12.5rem;
+  position: absolute;
+  z-index: 10000;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 12.5rem;
+  background: radial-gradient(
+                  ellipse at center,
+                  transparent 50%,
+                  rgba(30, 30, 30, 0.9) 70%
+  );
+}
+
+// 🌎
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+
+  &:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: url(https://assets.codepen.io/907471/noise.svg);
+    opacity: 0.7;
+    mix-blend-mode: overlay;
+    filter: invert(1);
+    z-index: 20000;
+  }
+}
+
+body {
+  background-color: var(--labs-sys-color-background);
+  color: var(--labs-sys-color-on-background);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  color: var(--labs-sys-color-triangle);
+}
+
+a.labs-follow-me {
+  right: unset;
+  left: -0.5rem;
+}
+
+* {
+  user-select: none;
+  box-sizing: border-box;
+  outline-color: var(--labs-sys-color-sun-2);
+}
+
+
+// 🌴
+.palm {
+  position: absolute;
+  transform: translate(10vmin, 0vmin) rotate(6deg);
+  --width: min(20vmin, 20%);
+  --hw: calc(var(--width) / 2);
+  width: var(--width);
+  aspect-ratio: 3/4;
+  container-type: size;
+  filter: drop-shadow(2px 4px 6px var(--sun-color-2));
+
+  &.small {
+    transform: translate(9vmin, 9vmin) scale(0.4)  rotate(344deg) skewX(5deg);
+  }
+  .leaf-1,
+  .leaf-1-s {
+    position: absolute;
+    width: 70cqmin;
+    height: 50cqmin;
+    top: 0;
+    background: linear-gradient(160deg, var(--color-palm-leaf) 50%, var(--color-palm-leaf-2));
+    clip-path: polygon(
+                    49.7% 16.42%,
+                    69.46% 11.94%,
+                    87.03% 17.91%,
+                    98.4% 30.85%,
+                    96.01% 34.33%,
+                    85.43% 30.85%,
+                    79.64% 37.81%,
+                    76.65% 57.71%,
+                    74.65% 48.76%,
+                    74.05% 65.17%,
+                    70.46% 70.15%,
+                    69.86% 50.25%,
+                    67.27% 67.16%,
+                    63.67% 72.64%,
+                    65.07% 61.19%,
+                    63.87% 53.23%,
+                    60.48% 70.65%,
+                    56.69% 75.62%,
+                    58.48% 64.18%,
+                    57.68% 58.21%,
+                    53.69% 77.61%,
+                    49.9% 82.09%,
+                    51.9% 60.2%,
+                    48.9% 74.13%,
+                    46.31% 81.09%,
+                    41.92% 85.07%,
+                    45.71% 62.69%,
+                    39.52% 83.58%,
+                    33.53% 88.06%,
+                    36.13% 81.09%,
+                    39.52% 66.67%,
+                    31.74% 85.57%,
+                    25.55% 91.54%,
+                    28.74% 84.58%,
+                    31.74% 69.15%,
+                    28.14% 78.61%,
+                    25.15% 85.07%,
+                    16.77% 92.54%,
+                    18.96% 86.07%,
+                    22.55% 74.63%,
+                    16.57% 85.07%,
+                    13.97% 88.56%,
+                    6.59% 93.03%,
+                    12.77% 80.1%,
+                    9.18% 85.57%,
+                    0.8% 96.52%,
+                    3.39% 86.07%,
+                    16.57% 54.73%,
+                    31.94% 28.36%
+    );
+    transform: translate(13cqmin, 16cqmin) rotate(347deg);
+  }
+  .leaf-1-s {
+    transform: translate(61cqmin, 17cqmin) rotate(14deg) scaleX(-1);
+  }
+  .leaf-2,
+  .leaf-2-s {
+    position: absolute;
+    width: 80cqmin;
+    height: 35cqmin;
+    top: 0;
+    background: linear-gradient(160deg, var(--color-palm-leaf) 50%, var(--color-palm-leaf-2));
+    clip-path: polygon(
+                    49.7% 16.42%,
+                    69.46% 11.94%,
+                    87.03% 17.91%,
+                    98.4% 30.85%,
+                    96.01% 34.33%,
+                    85.43% 30.85%,
+                    79.64% 37.81%,
+                    76.65% 57.71%,
+                    74.65% 48.76%,
+                    74.05% 65.17%,
+                    70.46% 70.15%,
+                    69.86% 50.25%,
+                    67.27% 67.16%,
+                    63.67% 72.64%,
+                    65.07% 61.19%,
+                    63.87% 53.23%,
+                    60.48% 70.65%,
+                    56.69% 75.62%,
+                    58.48% 64.18%,
+                    57.68% 58.21%,
+                    53.69% 77.61%,
+                    49.9% 82.09%,
+                    51.9% 60.2%,
+                    48.9% 74.13%,
+                    46.31% 81.09%,
+                    41.92% 85.07%,
+                    45.71% 62.69%,
+                    39.52% 83.58%,
+                    33.53% 88.06%,
+                    36.13% 81.09%,
+                    39.52% 66.67%,
+                    31.74% 85.57%,
+                    25.55% 91.54%,
+                    28.74% 84.58%,
+                    31.74% 69.15%,
+                    28.14% 78.61%,
+                    25.15% 85.07%,
+                    16.77% 92.54%,
+                    18.96% 86.07%,
+                    22.55% 74.63%,
+                    16.57% 85.07%,
+                    13.97% 88.56%,
+                    6.59% 93.03%,
+                    12.77% 80.1%,
+                    9.18% 85.57%,
+                    0.8% 96.52%,
+                    3.39% 86.07%,
+                    16.57% 54.73%,
+                    31.94% 28.36%
+    );
+    transform: translate(-6cqmin, -1cqmin) rotate(19deg);
+  }
+
+  .leaf-2-s {
+    transform: translate(66cqmin, 6cqmin) rotate(-8deg) scaleX(-1);
+  }
+  .leaf-3,
+  .leaf-3-s {
+    position: absolute;
+    width: 47cqmin;
+    height: 30cqmin;
+    top: 0;
+    background: linear-gradient(160deg, var(--color-palm-leaf) 50%, var(--color-palm-leaf-2));
+    clip-path: polygon(
+                    49.7% 16.42%,
+                    69.46% 11.94%,
+                    87.03% 17.91%,
+                    98.4% 30.85%,
+                    96.01% 34.33%,
+                    85.43% 30.85%,
+                    79.64% 37.81%,
+                    76.65% 57.71%,
+                    74.65% 48.76%,
+                    74.05% 65.17%,
+                    70.46% 70.15%,
+                    69.86% 50.25%,
+                    67.27% 67.16%,
+                    63.67% 72.64%,
+                    65.07% 61.19%,
+                    63.87% 53.23%,
+                    60.48% 70.65%,
+                    56.69% 75.62%,
+                    58.48% 64.18%,
+                    57.68% 58.21%,
+                    53.69% 77.61%,
+                    49.9% 82.09%,
+                    51.9% 60.2%,
+                    48.9% 74.13%,
+                    46.31% 81.09%,
+                    41.92% 85.07%,
+                    45.71% 62.69%,
+                    39.52% 83.58%,
+                    33.53% 88.06%,
+                    36.13% 81.09%,
+                    39.52% 66.67%,
+                    31.74% 85.57%,
+                    25.55% 91.54%,
+                    28.74% 84.58%,
+                    31.74% 69.15%,
+                    28.14% 78.61%,
+                    25.15% 85.07%,
+                    16.77% 92.54%,
+                    18.96% 86.07%,
+                    22.55% 74.63%,
+                    16.57% 85.07%,
+                    13.97% 88.56%,
+                    6.59% 93.03%,
+                    12.77% 80.1%,
+                    9.18% 85.57%,
+                    0.8% 96.52%,
+                    3.39% 86.07%,
+                    16.57% 54.73%,
+                    31.94% 28.36%
+    );
+    transform: translate(67cqmin, -8.8cqmin) rotate(128deg) scaleY(-1);
+  }
+
+  .leaf-3-s {
+    transform: translate(19.5cqmin, -10.8cqmin) rotate(56deg);
+    height: 20cqmin;
+    width: 66cqmin;
+    z-index: -1;
+  }
+
+
+  .trunk {
+    position: absolute;
+    height: 80cqh;
+    width: 22cqw;
+    transform: translate(53cqw, 10cqh);
+    border-radius: 200cqmin / 1000cqmin;
+    box-shadow: 5cqmin 8cqmin 0 0 var(--color-palm-trunk);
+  }
+  .trunk-bottom {
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 5cqh;
+    transform: translate(48cqw, 4cqh) rotate(359deg);
+    border-bottom: 20cqw var(--color-palm-trunk) solid;
+    border-left: 25cqw solid transparent;
+  }
+}
+
+body {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  width: 100vw;
+  background: #333;
+  color: magenta;
+}
+
+:root {
+  --color-palm-trunk: magenta;
+  --color-palm-leaf: magenta;
+  --color-palm-leaf-2: black;
+}

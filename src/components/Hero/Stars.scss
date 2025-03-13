@@ -1,0 +1,98 @@
+// Credits to Konstantin Denerz - https://codepen.io/konstantindenerz/
+
+:root {
+  --labs-sys-color-star: #f6c0c0;
+}
+
+.startails {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  mix-blend-mode: lighten;
+}
+
+.startail-r {
+  position: absolute;
+  left: 75vw;
+  bottom: 0;
+  background: linear-gradient(
+                  to right,
+                  var(--labs-sys-color-sun-glow) 10%,
+                  var(--labs-sys-color-triangle) 50%,
+                  transparent 80%
+  );
+  height: 0.2vmin;
+  width: 15vmin;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 15px white);
+  transform: translateY(-32vmin) rotate(-20deg);
+}
+
+.startail-l {
+  position: absolute;
+  left: 16vw;
+  bottom: 0;
+  background: linear-gradient(
+                  to right,
+                  var(--labs-sys-color-sun-glow) 10%,
+                  var(--labs-sys-color-triangle) 30%,
+                  transparent 60%
+  );
+  height: 0.2vmin;
+  width: 17vmin;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 15px white);
+  transform: translateY(-7vmin) rotate(-20deg);
+}
+
+.startail-m {
+  position: absolute;
+  left: 18vw;
+  bottom: 0;
+  background: linear-gradient(
+                  to right,
+                  var(--labs-sys-color-sun-glow) 10%,
+                  var(--labs-sys-color-triangle) 50%,
+                  transparent 80%
+  );
+  height: 0.2vmin;
+  width: 14vmin;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 15px white);
+  transform: translateY(-18vmin) rotate(-20deg);
+  opacity: 0.5;
+}
+
+// ✨
+#stars {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 10rem;
+  overflow: hidden;
+  left: 0;
+
+  .star {
+    position: absolute;
+    background: var(--labs-sys-color-star);
+    width: 0.15rem;
+    height: 0.15rem;
+    border-radius: 50%;
+    transform: translate(var(--x), var(--y));
+    box-shadow: 0 0 0.25rem var(--labs-sys-color-sun-glow);
+  }
+
+  animation: stars 20s linear infinite;
+}
+
+@keyframes stars{
+  from {
+    transform: translateX(0);
+  }
+  60%{
+    transform: translateX(3vmax) rotate(1deg);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

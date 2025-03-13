@@ -1,0 +1,43 @@
+:root {
+  --color-palm-trunk: #333;
+  --color-palm-leaf: #333;
+  --color-palm-leaf-2: #b9f;
+}
+
+// 🌴
+.palm {
+  &:not(.small) {
+    animation: palm-shaking 5s linear infinite;
+  }
+  &.small {
+    animation: small-palm-shaking 4s linear inifinte;
+  }
+}
+
+@keyframes palm-shaking {
+  from {
+    transform: translate(10vmin, 0vmin) rotate(6deg);
+  }
+
+  50% {
+    transform: translate(10.5vmin, 0vmin) rotate(9deg);
+  }
+
+  to {
+    transform: translate(10vmin, 0vmin) rotate(6deg);
+  }
+}
+
+@keyframes small-palm-shaking {
+  from {
+    transform: translate(9vmin, 9vmin) scale(0.4) rotate(344deg) skewX(5deg);
+  }
+
+  50% {
+    transform: translate(9vmin, 9vmin) scale(0.4) rotate(356deg) skewX(5deg);
+  }
+
+  to {
+    transform: translate(9vmin, 9vmin) scale(0.4) rotate(344deg) skewX(5deg);
+  }
+}

@@ -1,0 +1,42 @@
+// Credits to Konstantin Denerz - https://codepen.io/konstantindenerz/
+
+// 🏁
+.bottom {
+  background: inherit;
+  perspective: 14.5rem;
+  flex: 0 0 12.5rem;
+  position: relative;
+
+  // grid
+  &:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    --line-width: 0.0635rem;
+    background: linear-gradient(
+                    to right,
+                    var(--labs-sys-color-grid) var(--line-width),
+                    transparent var(--line-width)
+    ),
+    linear-gradient(
+                    to bottom,
+                    var(--labs-sys-color-grid) var(--line-width),
+                    transparent var(--line-width)
+    );
+    background-size: 2rem 125rem, 125rem 2rem;
+    transform: rotateX(53deg) scale(1.8) translateZ(43px);
+    animation: grid calc(var(--base-speed) * 1) linear infinite;
+    border-top: 1px solid var(--labs-sys-color-grid);
+    filter: drop-shadow(0 0 2px var(--labs-sys-color-grid-glow));
+  }
+}
+
+@keyframes grid {
+  from {
+    background-position-y: -30rem;
+  }
+
+  to {
+    background-position-y: 0%;
+  }
+}
