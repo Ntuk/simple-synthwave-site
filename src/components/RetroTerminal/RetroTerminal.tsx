@@ -46,6 +46,8 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
       // Clear previous commands and responses
       setResponses([]);
       setCommandHistory([]);
+      // Don't show welcome message when executing commands from links
+      setIsWelcomeTyping(false);
       // Add a small delay before executing the new command
       setTimeout(() => {
         processCommand(cmd);
@@ -71,6 +73,19 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   };
 
   const toggleTerminal = () => {
+    // If we're opening the terminal
+    if (isMinimized) {
+      // Reset the terminal state
+      setResponses([]);
+      setCommandHistory([]);
+      setIsWelcomeTyping(true);
+      
+      // Show the help command after a delay
+      setTimeout(() => {
+        processCommand('help');
+      }, 1500); // Wait for welcome message to finish typing
+    }
+    
     setIsMinimized(!isMinimized);
   };
 

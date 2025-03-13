@@ -13,19 +13,16 @@
   backdrop-filter: blur(5px);
   margin: 5px;
   box-shadow: 0 0 10px rgba(246, 114, 202, 0.2);
+  white-space: nowrap;
   
   &:hover {
     background: rgba(0, 0, 0, 0.8);
     transform: translateY(-2px);
     box-shadow: 0 0 15px rgba(246, 114, 202, 0.4);
-    color: #f672ca;
-    
-    .terminal-link-command {
-      color: #6eccee;
-    }
   }
   
   .terminal-link-icon {
+    color: #f672ca;
     margin-right: 8px;
     font-size: 16px;
   }
@@ -37,5 +34,37 @@
   .terminal-link-command {
     color: rgba(246, 114, 202, 0.7);
     transition: color 0.3s ease;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 16px;
+    
+    .terminal-link-icon {
+      font-size: 14px;
+      margin-right: 6px;
+    }
+    
+    .terminal-link-text {
+      margin-right: 6px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 4px 8px;
+    font-size: 14px;
+    
+    .terminal-link-icon {
+      font-size: 12px;
+      margin-right: 4px;
+    }
+    
+    .terminal-link-text {
+      margin-right: 4px;
+    }
+    
+    .terminal-link-command {
+      display: none; // Hide the command part on very small screens
+    }
   }
 } 

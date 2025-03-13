@@ -31,7 +31,21 @@
     right: 0.5rem;
     
     a {
-      padding: 0.4rem 0.8rem;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+      border-width: 1px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    top: 0.3rem;
+    right: 0.3rem;
+    gap: 0.3rem;
+    
+    a {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.7rem;
+      border-width: 1px;
     }
   }
 } 
