@@ -21,6 +21,20 @@
   align-items: center;
   justify-content: flex-end;
   animation: moveDelorean 8s ease infinite alternate;
+  
+  /* Add padding for mobile devices with navigation bars */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  
+  /* Adjust position on mobile devices */
+  @media (max-width: 768px) {
+    bottom: calc(2rem + env(safe-area-inset-bottom, 0));
+  }
+  
+  /* Further adjust for smaller screens */
+  @media (max-width: 480px) {
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+    transform: scale(0.9); /* Slightly reduce size on very small screens */
+  }
 
   .delorean-top {
     width: 40vmin;

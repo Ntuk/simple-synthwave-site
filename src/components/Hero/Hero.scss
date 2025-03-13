@@ -154,6 +154,20 @@
   height: 100vh;
   position: relative;
 
+  /* Add support for mobile devices with navigation bars */
+  @supports (height: 100dvh) {
+    height: 100dvh; /* Use dynamic viewport height when supported */
+  }
+  
+  /* Fallback for older browsers */
+  @supports not (height: 100dvh) {
+    height: calc(100vh - env(safe-area-inset-bottom, 0px));
+    /* iOS specific fallback */
+    @supports (-webkit-touch-callout: none) {
+      height: -webkit-fill-available;
+    }
+  }
+
   &:after {
     content: "";
     position: absolute;

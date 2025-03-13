@@ -11,6 +11,31 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Handle mobile devices with navigation bars */
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  /* Use dynamic viewport height when supported */
+  height: 100vh;
+  
+  @supports (height: 100dvh) {
+    height: 100dvh;
+  }
+  
+  /* Fallback for browsers that don't support dvh */
+  @supports not (height: 100dvh) {
+    height: calc(100vh - var(--safe-area-inset-bottom));
+  }
+  
+  /* iOS specific fallback */
+  @supports (-webkit-touch-callout: none) {
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Ensure content is padded above navigation bars */
+  padding-bottom: var(--safe-area-inset-bottom);
 }
 
 a {
@@ -27,7 +52,6 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
