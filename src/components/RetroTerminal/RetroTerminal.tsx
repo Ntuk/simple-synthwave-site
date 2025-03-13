@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 're
 import TypingEffect from '../TypingEffect/TypingEffect';
 import { FaTerminal } from 'react-icons/fa';
 import './RetroTerminal.scss';
+import { event } from '../../utils/analytics';
 
 interface CommandResponse {
   text: string | JSX.Element;
@@ -98,29 +99,37 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   };
 
   const toggleTerminal = () => {
-    // If we're opening the terminal
-    if (isMinimized) {
-      // Reset the terminal state
-      setResponses([]);
-      setCommandHistory([]);
-      setIsWelcomeTyping(true);
-      
-      // Show the help command after a delay
-      setTimeout(() => {
-        processCommand('help');
-      }, 1500); // Wait for welcome message to finish typing
-    }
-    
-    // Mark that the user has clicked the terminal
-    if (!hasClickedTerminal) {
-      setHasClickedTerminal(true);
-      
-    }
-    
     setIsMinimized(!isMinimized);
+    setHasClickedTerminal(true);
+    
+    // Track terminal toggle event
+    event({
+      action: isMinimized ? 'open' : 'close',
+      category: 'terminal',
+      label: 'user_interaction'
+    });
+    
+    if (!isMinimized) {
+      // If we're minimizing, stop any matrix effect
+      if (isMatrixRunning) {
+        setIsMatrixRunning(false);
+      }
+    } else {
+      // Focus the input when terminal is opened
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
   };
 
   const processCommand = (cmd: string) => {
+    // Track command execution
+    event({
+      action: 'execute_command',
+      category: 'terminal',
+      label: cmd.toLowerCase()
+    });
+    
     // Add command to history
     setCommandHistory(prev => [...prev, cmd]);
 
@@ -406,7 +415,7 @@ Accessing the digital realm...
 Decoding reality...
 Matrix activated for 10 seconds.
 ==================================`;
-      case 'game':
+      case 'game': {
         // Start a new game
         const newSecretNumber = Math.floor(Math.random() * 100) + 1;
         setSecretNumber(newSecretNumber);
@@ -422,6 +431,7 @@ Type your guess as a number (e.g., "42").
 Type "quit game" to exit the game.
 ==================================
 `;
+      }
       case 'theme':
         return `
 <span class="header-green">[THEME SELECTOR]</span>
