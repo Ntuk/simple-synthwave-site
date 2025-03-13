@@ -1,0 +1,29 @@
+.typing-effect {
+  display: inline-block;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #6eccee;
+  text-shadow: 0 0 10px rgba(110, 204, 238, 0.7);
+  line-height: 1.4;
+  
+  .typing-text {
+    white-space: pre-wrap;
+  }
+  
+  .typing-cursor {
+    display: inline-block;
+    margin-left: 2px;
+    font-weight: bold;
+    color: #f672ca;
+    text-shadow: 0 0 10px rgba(246, 114, 202, 0.7);
+    
+    &.blinking {
+      animation: blink 1s step-end infinite;
+    }
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+} 
