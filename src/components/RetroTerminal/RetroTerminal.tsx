@@ -18,8 +18,14 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const [responses, setResponses] = useState<CommandResponse[]>([]);
   const [isWelcomeTyping, setIsWelcomeTyping] = useState(true);
   const [isMinimized, setIsMinimized] = useState(true);
+  const [isMatrixRunning, setIsMatrixRunning] = useState(false);
+  const [gameActive, setGameActive] = useState(false);
+  const [secretNumber, setSecretNumber] = useState(0);
+  const [guessCount, setGuessCount] = useState(0);
+  const [theme, setTheme] = useState('synthwave');
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const matrixRef = useRef<HTMLDivElement>(null);
 
   const welcomeMessage = `
 > WELCOME TO NICO'S TERMINAL v1.0
@@ -94,7 +100,58 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
     // Add command to history
     setCommandHistory(prev => [...prev, cmd]);
 
-    // Process command and get response
+    // Check if we're in a game
+    if (gameActive && cmd.toLowerCase() !== 'quit game') {
+      // Try to parse the input as a number
+      const guess = parseInt(cmd);
+      
+      if (isNaN(guess)) {
+        setResponses(prev => [...prev, { 
+          text: "That's not a valid number. Try again or type 'quit game' to exit.",
+          isTyping: true 
+        }]);
+        return;
+      }
+      
+      // Increment guess count
+      const newGuessCount = guessCount + 1;
+      setGuessCount(newGuessCount);
+      
+      // Check the guess
+      let response = '';
+      if (guess < secretNumber) {
+        response = `Too low! Try a higher number. (Attempt ${newGuessCount})`;
+      } else if (guess > secretNumber) {
+        response = `Too high! Try a lower number. (Attempt ${newGuessCount})`;
+      } else {
+        response = `
+<span class="header-green">[CONGRATULATIONS!]</span>
+==================================
+You guessed the number ${secretNumber} correctly in ${newGuessCount} attempts!
+Game over. Type 'game' to play again.
+==================================
+`;
+        setGameActive(false);
+      }
+      
+      setResponses(prev => [...prev, { 
+        text: response,
+        isTyping: true 
+      }]);
+      return;
+    }
+    
+    // Handle "quit game" command
+    if (cmd.toLowerCase() === 'quit game' && gameActive) {
+      setGameActive(false);
+      setResponses(prev => [...prev, { 
+        text: `Game aborted. The number was ${secretNumber}.`,
+        isTyping: true 
+      }]);
+      return;
+    }
+
+    // Process regular command and get response
     const response = getCommandResponse(cmd.toLowerCase());
     
     // Add response with typing effect
@@ -113,6 +170,9 @@ Available commands:
 - skills: See my technical skills
 - projects: View my projects
 - contact: How to reach me
+- matrix: Activate the matrix
+- game: Play a number guessing game
+- theme: Change color theme (synthwave, hacker, sunset, ocean)
 - clear: Clear the terminal
 - exit: Minimize this terminal
 `;
@@ -307,10 +367,66 @@ Technologies: Vue, Node.js, Firebase
           setIsMinimized(true);
         }, 500);
         return 'Minimizing terminal...';
+      case 'matrix':
+        // Start matrix animation
+        setTimeout(() => {
+          setIsMatrixRunning(true);
+          // Auto-stop after 10 seconds
+          setTimeout(() => {
+            setIsMatrixRunning(false);
+          }, 10000);
+        }, 500);
+        return `<span class="header-green">[INITIATING MATRIX SEQUENCE]</span>
+==================================
+Accessing the digital realm...
+Decoding reality...
+Matrix activated for 10 seconds.
+==================================`;
+      case 'game':
+        // Start a new game
+        const newSecretNumber = Math.floor(Math.random() * 100) + 1;
+        setSecretNumber(newSecretNumber);
+        setGameActive(true);
+        setGuessCount(0);
+        return `
+<span class="header-green">[GAME INITIALIZED: NUMBER GUESSER]</span>
+==================================
+I'm thinking of a number between 1 and 100.
+Try to guess it in as few attempts as possible!
+
+Type your guess as a number (e.g., "42").
+Type "quit game" to exit the game.
+==================================
+`;
+      case 'theme':
+        return `
+<span class="header-green">[THEME SELECTOR]</span>
+==================================
+Available themes:
+- synthwave (default)
+- hacker
+- sunset
+- ocean
+
+Usage: theme [name]
+Example: theme hacker
+==================================
+`;
       default:
         if (cmd.startsWith('project ')) {
           return `Project details not found. Try 'projects' to see the list.`;
         }
+        
+        if (cmd.startsWith('theme ')) {
+          const themeName = cmd.split(' ')[1]?.toLowerCase();
+          if (['synthwave', 'hacker', 'sunset', 'ocean'].includes(themeName)) {
+            setTheme(themeName);
+            return `Theme changed to ${themeName}. Enjoy your new visual experience!`;
+          } else {
+            return `Theme not found. Available themes: synthwave, hacker, sunset, ocean`;
+          }
+        }
+        
         return `Command not recognized: ${cmd}. Type 'help' to see available commands.`;
     }
   };
@@ -323,6 +439,59 @@ Technologies: Vue, Node.js, Firebase
     );
   };
 
+  // Matrix animation effect
+  useEffect(() => {
+    if (!isMatrixRunning || !matrixRef.current) return;
+    
+    const canvas = document.createElement('canvas');
+    matrixRef.current.innerHTML = '';
+    matrixRef.current.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    canvas.width = matrixRef.current.clientWidth;
+    canvas.height = matrixRef.current.clientHeight;
+    
+    const characters = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+    const columns = canvas.width / 20;
+    const drops: number[] = [];
+    
+    for (let i = 0; i < columns; i++) {
+      drops[i] = 1;
+    }
+    
+    const draw = () => {
+      if (!ctx || !isMatrixRunning) return;
+      
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#0f0';
+      ctx.font = '15px monospace';
+      
+      for (let i = 0; i < drops.length; i++) {
+        const text = characters.charAt(Math.floor(Math.random() * characters.length));
+        ctx.fillText(text, i * 20, drops[i] * 20);
+        
+        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        
+        drops[i]++;
+      }
+    };
+    
+    const interval = setInterval(draw, 33);
+    
+    return () => {
+      clearInterval(interval);
+      if (matrixRef.current) {
+        matrixRef.current.innerHTML = '';
+      }
+    };
+  }, [isMatrixRunning]);
+
   if (isMinimized) {
     return (
       <button className="terminal-icon" onClick={toggleTerminal} title="Open Terminal">
@@ -332,7 +501,7 @@ Technologies: Vue, Node.js, Firebase
   }
 
   return (
-    <div className="retro-terminal">
+    <div className={`retro-terminal theme-${theme}`}>
       <div className="terminal-overlay" onClick={() => setIsMinimized(true)} />
       <div className="terminal-window" onClick={(e) => e.stopPropagation()}>
         <div className="terminal-header">
@@ -345,11 +514,15 @@ Technologies: Vue, Node.js, Firebase
         </div>
         
         <div className="terminal-body" ref={terminalRef}>
+          {isMatrixRunning && (
+            <div className="matrix-container" ref={matrixRef}></div>
+          )}
+          
           <div className="terminal-welcome">
             {isWelcomeTyping ? (
               <TypingEffect 
                 text={welcomeMessage} 
-                speed={30} 
+                speed={20} 
                 onComplete={handleWelcomeComplete} 
               />
             ) : (
@@ -368,8 +541,8 @@ Technologies: Vue, Node.js, Firebase
               {response.isTyping && typeof response.text === 'string' ? (
                 <TypingEffect 
                   text={response.text} 
-                  speed={10} 
-                  delay={300} 
+                  speed={7} 
+                  delay={200} 
                   onComplete={() => handleResponseComplete(index)} 
                 />
               ) : (
