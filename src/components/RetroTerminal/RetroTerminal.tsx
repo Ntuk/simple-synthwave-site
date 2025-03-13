@@ -23,7 +23,8 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const [secretNumber, setSecretNumber] = useState(0);
   const [guessCount, setGuessCount] = useState(0);
   const [theme, setTheme] = useState('synthwave');
-  const [showHint, setShowHint] = useState(true);
+  const [hasClickedTerminal, setHasClickedTerminal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
@@ -32,6 +33,22 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
 > WELCOME TO NICO'S TERMINAL v1.0
 > TYPE 'help' TO SEE AVAILABLE COMMANDS
 `;
+
+  useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Initial check
+    checkMobile();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     // Focus input when terminal is opened
@@ -92,6 +109,12 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
       setTimeout(() => {
         processCommand('help');
       }, 1500); // Wait for welcome message to finish typing
+    }
+    
+    // Mark that the user has clicked the terminal
+    if (!hasClickedTerminal) {
+      setHasClickedTerminal(true);
+      
     }
     
     setIsMinimized(!isMinimized);
@@ -413,6 +436,10 @@ Usage: theme [name]
 Example: theme hacker
 ==================================
 `;
+      case 'reset-hint':
+        // Reset the terminal hint state (hidden command for testing)
+        setHasClickedTerminal(false);
+        return `Hint reset successful. Reload the page to see the hint again.`;
       default:
         if (cmd.startsWith('project ')) {
           return `Project details not found. Try 'projects' to see the list.`;
@@ -493,26 +520,16 @@ Example: theme hacker
     };
   }, [isMatrixRunning]);
 
-  // Hide hint after a few seconds
-  useEffect(() => {
-    if (showHint) {
-      const timer = setTimeout(() => {
-        setShowHint(false);
-      }, 5000); // Show hint for 5 seconds
-      return () => clearTimeout(timer);
-    }
-  }, [showHint]);
-
   if (isMinimized) {
     return (
       <>
         <button 
-          className={`terminal-icon ${showHint ? 'pulse-animation' : ''}`} 
+          className={`terminal-icon ${!hasClickedTerminal ? 'pulse-animation' : ''}`} 
           onClick={toggleTerminal} 
           title="Open Terminal"
         >
           <FaTerminal />
-          {showHint && <div className="terminal-hint">Click to open terminal</div>}
+          {!hasClickedTerminal && <div className="terminal-hint">{isMobile ? "Tap" : "Click"} to open terminal</div>}
         </button>
       </>
     );

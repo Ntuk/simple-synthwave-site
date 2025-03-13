@@ -24,6 +24,19 @@
     }
   }
   
+  // iPad Air and similar tablet devices
+  @media (min-width: 768px) and (max-width: 1024px) {
+    flex-direction: row;
+    gap: 0.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
+    
+    a {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.9rem;
+    }
+  }
+  
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 0.5rem;

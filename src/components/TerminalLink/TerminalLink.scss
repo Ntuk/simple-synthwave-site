@@ -36,6 +36,26 @@
     transition: color 0.3s ease;
   }
   
+  // iPad Air and similar tablet devices
+  @media (min-width: 768px) and (max-width: 1024px) {
+    padding: 6px 10px;
+    font-size: 16px;
+    margin: 3px;
+    
+    .terminal-link-icon {
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    
+    .terminal-link-text {
+      margin-right: 5px;
+    }
+    
+    .terminal-link-command {
+      font-size: 14px;
+    }
+  }
+  
   @media (max-width: 768px) {
     padding: 6px 12px;
     font-size: 16px;
