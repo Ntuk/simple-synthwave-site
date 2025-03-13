@@ -23,6 +23,7 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const [secretNumber, setSecretNumber] = useState(0);
   const [guessCount, setGuessCount] = useState(0);
   const [theme, setTheme] = useState('synthwave');
+  const [showHint, setShowHint] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
@@ -492,11 +493,28 @@ Example: theme hacker
     };
   }, [isMatrixRunning]);
 
+  // Hide hint after a few seconds
+  useEffect(() => {
+    if (showHint) {
+      const timer = setTimeout(() => {
+        setShowHint(false);
+      }, 5000); // Show hint for 5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [showHint]);
+
   if (isMinimized) {
     return (
-      <button className="terminal-icon" onClick={toggleTerminal} title="Open Terminal">
-        <FaTerminal />
-      </button>
+      <>
+        <button 
+          className={`terminal-icon ${showHint ? 'pulse-animation' : ''}`} 
+          onClick={toggleTerminal} 
+          title="Open Terminal"
+        >
+          <FaTerminal />
+          {showHint && <div className="terminal-hint">Click to open terminal</div>}
+        </button>
+      </>
     );
   }
 
