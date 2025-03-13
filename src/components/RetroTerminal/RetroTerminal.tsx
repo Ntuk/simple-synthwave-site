@@ -1,14 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import TypingEffect from '../TypingEffect/TypingEffect';
-import { FaTerminal } from 'react-icons/fa';
+import { FaTerminal, FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from 'react-icons/fa';
 import './RetroTerminal.scss';
 
 interface CommandResponse {
-  text: string;
+  text: string | JSX.Element;
   isTyping: boolean;
 }
 
-function RetroTerminal() {
+export interface RetroTerminalHandle {
+  executeCommand: (cmd: string) => void;
+}
+
+const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [responses, setResponses] = useState<CommandResponse[]>([]);
@@ -35,6 +39,19 @@ function RetroTerminal() {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [responses, commandHistory]);
+
+  useImperativeHandle(ref, () => ({
+    executeCommand: (cmd: string) => {
+      setIsMinimized(false);
+      // Clear previous commands and responses
+      setResponses([]);
+      setCommandHistory([]);
+      // Add a small delay before executing the new command
+      setTimeout(() => {
+        processCommand(cmd);
+      }, 100);
+    }
+  }));
 
   const handleWelcomeComplete = () => {
     setIsWelcomeTyping(false);
@@ -65,7 +82,29 @@ function RetroTerminal() {
     const response = getCommandResponse(cmd.toLowerCase());
     
     // Add response with typing effect
-    setResponses(prev => [...prev, { text: response, isTyping: true }]);
+    setResponses(prev => [...prev, { 
+      text: cmd === 'contact' ? (
+        <div className="contact-links">
+          <div className="contact-header">[CONTACT PROTOCOLS INITIALIZED]</div>
+          <div className="contact-divider">==================================</div>
+          <a href="mailto:nico.tukiainen@gmail.com" target="_blank" rel="noopener noreferrer">
+            <FaEnvelope /> Email: nico.tukiainen@gmail.com
+          </a>
+          <a href="https://github.com/Ntuk" target="_blank" rel="noopener noreferrer">
+            <FaGithub /> GitHub: github.com/Ntuk
+          </a>
+          <a href="https://linkedin.com/in/nico-tukiainen" target="_blank" rel="noopener noreferrer">
+            <FaLinkedin /> LinkedIn: linkedin.com/in/nico-tukiainen
+          </a>
+          <a href="https://twitter.com/NicoTukiainen" target="_blank" rel="noopener noreferrer">
+            <FaTwitter /> Twitter: twitter.com/NicoTukiainen
+          </a>
+          <div className="contact-divider">==================================</div>
+          <div className="contact-footer">[END TRANSMISSION]</div>
+        </div>
+      ) : response,
+      isTyping: true 
+    }]);
   };
 
   const getCommandResponse = (cmd: string): string => {
@@ -220,12 +259,16 @@ Technologies: Vue, Node.js, Firebase
 `;
       case 'contact':
         return `
-Contact Information:
-- Email: nico.tukiainen@gmail.com
-- GitHub: github.com/Ntuk
-- LinkedIn: linkedin.com/in/nico-tukiainen
-- Twitter: twitter.com/NicoTukiainen
-`;
+[CONTACT PROTOCOLS INITIALIZED]
+==================================
+
+<a href="mailto:nico.tukiainen@gmail.com" target="_blank" rel="noopener noreferrer"><FaEnvelope /> Email: nico.tukiainen@gmail.com</a>
+<a href="https://github.com/Ntuk" target="_blank" rel="noopener noreferrer"><FaGithub /> GitHub: github.com/Ntuk</a>
+<a href="https://linkedin.com/in/nico-tukiainen" target="_blank" rel="noopener noreferrer"><FaLinkedin /> LinkedIn: linkedin.com/in/nico-tukiainen</a>
+<a href="https://twitter.com/NicoTukiainen" target="_blank" rel="noopener noreferrer"><FaTwitter /> Twitter: twitter.com/NicoTukiainen</a>
+
+[END TRANSMISSION]
+==================================`;
       case 'clear':
         // Clear the terminal
         setTimeout(() => {
@@ -297,7 +340,7 @@ Contact Information:
           
           {responses.map((response, index) => (
             <div key={`resp-${index}`} className="terminal-response">
-              {response.isTyping ? (
+              {response.isTyping && typeof response.text === 'string' ? (
                 <TypingEffect 
                   text={response.text} 
                   speed={10} 
@@ -305,7 +348,11 @@ Contact Information:
                   onComplete={() => handleResponseComplete(index)} 
                 />
               ) : (
-                <pre>{response.text}</pre>
+                typeof response.text === 'string' ? (
+                  <pre>{response.text}</pre>
+                ) : (
+                  response.text
+                )
               )}
             </div>
           ))}
@@ -326,6 +373,6 @@ Contact Information:
       </div>
     </div>
   );
-}
+});
 
 export default RetroTerminal; 

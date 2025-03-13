@@ -252,4 +252,45 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+
+  .contact-header, .contact-footer {
+    color: #f672ca;
+    font-weight: bold;
+  }
+
+  .contact-divider {
+    color: #6eccee;
+    opacity: 0.7;
+    margin: 0.25rem 0;
+  }
+
+  a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+    transition: all 0.3s ease;
+
+    svg {
+      color: #f672ca;
+    }
+
+    &:hover {
+      color: #f672ca;
+      transform: translateX(5px);
+      
+      svg {
+        color: #6eccee;
+      }
+    }
+  }
 } 

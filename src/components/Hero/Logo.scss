@@ -148,6 +148,11 @@
   place-items: center;
   transform: translateY(-35vh);
   z-index: 10000;
+  pointer-events: none;
+  
+  .triangle, .kode-text {
+    pointer-events: none;
+  }
 }
 
 .demo-retro-wave-logo {

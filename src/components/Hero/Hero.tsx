@@ -1,12 +1,17 @@
 import { useEffect } from 'react';
 import './Hero.scss';
-import SoMeBar from "../SoMeBar/SoMeBar.tsx";
-import Delorean from "./Delorean.tsx";
-import Palm from "./Palm.tsx";
-import Logo from "./Logo.tsx";
-import Stars from "./Stars.tsx";
-import Sun from "./Sun.tsx";
-import BottomGrid from "./BottomGrid.tsx";
+import TerminalNav from "../TerminalNav/TerminalNav";
+import Delorean from "./Delorean";
+import Palm from "./Palm";
+import Logo from "./Logo";
+import Stars from "./Stars";
+import Sun from "./Sun";
+import BottomGrid from "./BottomGrid";
+import { RetroTerminalHandle } from "../RetroTerminal/RetroTerminal";
+
+interface HeroProps {
+  terminalRef: React.RefObject<RetroTerminalHandle>;
+}
 
 const getRandomInt = (min: number, max: number) => {
   min = Math.ceil(min);
@@ -14,7 +19,7 @@ const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-function Hero() {
+function Hero({ terminalRef }: HeroProps) {
   useEffect(() => {
     const stars = document.getElementById("stars");
 
@@ -43,17 +48,16 @@ function Hero() {
 
   return (
     <div className="hero-container">
-      <SoMeBar/>
-      <Delorean/>
+      <TerminalNav terminalRef={terminalRef} />
+      <Delorean />
       <div className="top">
-        <Stars/>
+        <Stars />
         <div className="top-lines"></div>
-        <Logo/>
-        <Sun/>
-        <Palm/>
+        <Logo />
+        <Sun />
+        <Palm />
       </div>
-
-      <BottomGrid/>
+      <BottomGrid />
     </div>
   );
 }

@@ -1,0 +1,37 @@
+.terminal-nav {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10001;
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  padding: 0.5rem;
+  
+  a {
+    position: relative;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #f672ca;
+    border-radius: 4px;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(246, 114, 202, 0.4);
+      background: rgba(0, 0, 0, 0.8);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
+    
+    a {
+      padding: 0.4rem 0.8rem;
+    }
+  }
+} 

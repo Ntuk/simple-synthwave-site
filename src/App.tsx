@@ -1,12 +1,15 @@
+import { useRef } from 'react';
 import './App.scss'
-import Hero from "./components/Hero/Hero.tsx";
-import RetroTerminal from "./components/RetroTerminal/RetroTerminal.tsx";
+import Hero from "./components/Hero/Hero";
+import RetroTerminal, { RetroTerminalHandle } from "./components/RetroTerminal/RetroTerminal";
 
 function App() {
+  const terminalRef = useRef<RetroTerminalHandle>(null);
+
   return (
     <>
-      <Hero/>
-      <RetroTerminal/>
+      <Hero terminalRef={terminalRef} />
+      <RetroTerminal ref={terminalRef} />
     </>
   )
 }
