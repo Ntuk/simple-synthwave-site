@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import TypingEffect from '../TypingEffect/TypingEffect';
-import { FaTerminal, FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from 'react-icons/fa';
+import { FaTerminal } from 'react-icons/fa';
 import './RetroTerminal.scss';
 
 interface CommandResponse {
@@ -33,6 +33,7 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
     }
   }, [isMinimized]);
 
+  // We can keep this as a fallback, but it's less important now
   useEffect(() => {
     // Scroll to bottom when new content is added
     if (terminalRef.current) {
@@ -98,26 +99,7 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
     
     // Add response with typing effect
     setResponses(prev => [...prev, { 
-      text: cmd === 'contact' ? (
-        <div className="contact-links">
-          <div className="contact-header">[CONTACT PROTOCOLS INITIALIZED]</div>
-          <div className="contact-divider">==================================</div>
-          <a href="mailto:nico.tukiainen@gmail.com" target="_blank" rel="noopener noreferrer">
-            <FaEnvelope /> Email: nico.tukiainen@gmail.com
-          </a>
-          <a href="https://github.com/Ntuk" target="_blank" rel="noopener noreferrer">
-            <FaGithub /> GitHub: github.com/Ntuk
-          </a>
-          <a href="https://linkedin.com/in/nico-tukiainen" target="_blank" rel="noopener noreferrer">
-            <FaLinkedin /> LinkedIn: linkedin.com/in/nico-tukiainen
-          </a>
-          <a href="https://twitter.com/NicoTukiainen" target="_blank" rel="noopener noreferrer">
-            <FaTwitter /> Twitter: twitter.com/NicoTukiainen
-          </a>
-          <div className="contact-divider">==================================</div>
-          <div className="contact-footer">[END TRANSMISSION]</div>
-        </div>
-      ) : response,
+      text: response,
       isTyping: true 
     }]);
   };
@@ -136,35 +118,35 @@ Available commands:
 `;
       case 'about':
         return `
-[SYSTEM SCAN COMPLETE]
+<span class="header-green">[SYSTEM SCAN COMPLETE]</span>
 > Identifying: NICO TUKIAINEN
 > Status: ONLINE
 > Generation: 1986 Model
 > Location: FINLAND
 
-[CORE SPECIFICATIONS]
+<span class="header-green">[CORE SPECIFICATIONS]</span>
 > Class: Full-Stack Developer
 > Specialization: Frontend Architecture
 > Power Source: Coffee & Code
 
-[EDUCATION MODULES]
+<span class="header-green">[EDUCATION MODULES]</span>
 > Bachelor.exe successfully executed at Haaga-Helia University of Applied Sciences
 > Master.exe currently loading... [===>      ] at Oulu University of Applied Sciences
 
-[RUNTIME ACTIVITIES]
+<span class="header-green">[RUNTIME ACTIVITIES]</span>
 When not optimizing code or debugging the matrix, this unit can be found:
 > Executing physical_exercise.bat
 > Running travel_adventures.exe with wife.instance
 > Exploring new tech_stacks.json
 
-[END TRANSMISSION]
+<span class="header-green">[END TRANSMISSION]</span>
 `;
       case 'skills':
         return `
-[INITIALIZING SKILL MATRIX...]
+<span class="header-green">[INITIALIZING SKILL MATRIX...]</span>
 ==================================
 
-[FRONTEND ARSENAL]
+<span class="header-green">[FRONTEND ARSENAL]</span>
 > CORE TECHNOLOGIES
   - HTML5 / CSS3 / JavaScript
   - TypeScript [Primary Weapon]
@@ -183,7 +165,7 @@ When not optimizing code or debugging the matrix, this unit can be found:
   - Webpack [Bundle Master]
   - NPM/Yarn [Package Command]
 
-[BACKEND POWERHOUSE]
+<span class="header-green">[BACKEND POWERHOUSE]</span>
 > SERVER TECHNOLOGIES
   - Node.js [Runtime of Choice]
   - Express [API Architect]
@@ -196,7 +178,7 @@ When not optimizing code or debugging the matrix, this unit can be found:
   - AWS [Cloud Commander]
   - Supercomputing [Performance Optimizer]
 
-[DEVELOPMENT TOOLKIT]
+<span class="header-green">[DEVELOPMENT TOOLKIT]</span>
 > DESIGN & COLLABORATION
   - UI/UX Design [User Matrix]
   - Figma [Design Synthesizer]
@@ -209,80 +191,108 @@ When not optimizing code or debugging the matrix, this unit can be found:
   - Performance Optimization [Speed Daemon]
   - Security Best Practices [Shield Generator]
 
-[SKILL MATRIX LOADED SUCCESSFULLY]
+<span class="header-green">[SKILL MATRIX LOADED SUCCESSFULLY]</span>
 ==================================
 `;
       case 'projects':
         return `
+<span class="header-green">[PROJECT DATABASE]</span>
+==================================
+
 Notable Projects:
-1. Smart Recipe Meal Planner - AI-powered meal suggestions
-2. Crypto Trading Bot - Automated trading system
-3. Coinbase API Proxy - Secure AWS Lambda middleware
-4. Simple Synthwave Site - This retro portfolio
-5. Hiljaisen Sillan Kennel - Modern kennel website
-6. AFPS Finland - Gaming community platform
+<span class="project-number">1.</span> Smart Recipe Meal Planner - AI-powered meal suggestions
+<span class="project-number">2.</span> Crypto Trading Bot - Automated trading system
+<span class="project-number">3.</span> Coinbase API Proxy - Secure AWS Lambda middleware
+<span class="project-number">4.</span> Simple Synthwave Site - This retro portfolio
+<span class="project-number">5.</span> Hiljaisen Sillan Kennel - Modern kennel website
+<span class="project-number">6.</span> AFPS Finland - Gaming community platform
 
 Type 'project 1', 'project 2', etc. for more details.
+<span class="header-green">[END DATABASE]</span>
 `;
       case 'project 1':
         return `
+<span class="header-green">[PROJECT DETAILS: 01]</span>
+==================================
+
 Smart Recipe Meal Planner:
 A microservices-based meal planning application that suggests recipes
 based on available ingredients, dietary preferences, and user history.
 Intelligent meal recommendations with shopping list generation.
 Technologies: TypeScript, Microservices, AI/ML
+==================================
 `;
       case 'project 2':
         return `
+<span class="header-green">[PROJECT DETAILS: 02]</span>
+==================================
+
 Crypto Trading Bot:
 An automated trading system designed for executing trades based on 
 market signals and custom strategies. Features real-time data analysis,
 risk management, and multi-exchange integration.
 Technologies: TypeScript, Node.js, WebSocket
+==================================
 `;
       case 'project 3':
         return `
+<span class="header-green">[PROJECT DETAILS: 03]</span>
+==================================
+
 Coinbase API Proxy:
 A lightweight AWS Lambda proxy serving as a secure middleware between 
 trading bots and external services. Handles trade execution, market data,
 and provides a scalable interface for crypto operations.
 Technologies: TypeScript, AWS Lambda, API Gateway
+==================================
 `;
       case 'project 4':
         return `
+<span class="header-green">[PROJECT DETAILS: 04]</span>
+==================================
+
 Simple Synthwave Site:
 A minimal, fast, and fully responsive personal website built with 
 modern web technologies. Features clean design, smooth CSS animations,
 and that unmistakable 80's synthwave aesthetic.
 Technologies: HTML, SCSS, JavaScript
+==================================
 `;
       case 'project 5':
         return `
+<span class="header-green">[PROJECT DETAILS: 05]</span>
+==================================
+
 Hiljaisen Sillan Kennel:
 A modern, responsive website built for a dachshund breeding kennel.
 Features information about available puppies, breeding ethics, and 
 detailed contact information. Clean design with intuitive navigation.
 Technologies: TypeScript, React, SCSS
+==================================
 `;
       case 'project 6':
         return `
+<span class="header-green">[PROJECT DETAILS: 06]</span>
+==================================
+
 AFPS Finland:
 A community website for Finnish arena FPS gaming enthusiasts.
 Provides news, events, and resources for the fast-paced FPS community.
 Features tournament tracking and community engagement tools.
 Technologies: Vue, Node.js, Firebase
+==================================
 `;
       case 'contact':
         return `
-[CONTACT PROTOCOLS INITIALIZED]
+<span class="header-green">[CONTACT PROTOCOLS INITIALIZED]</span>
 ==================================
 
-<a href="mailto:nico.tukiainen@gmail.com" target="_blank" rel="noopener noreferrer"><FaEnvelope /> Email: nico.tukiainen@gmail.com</a>
-<a href="https://github.com/Ntuk" target="_blank" rel="noopener noreferrer"><FaGithub /> GitHub: github.com/Ntuk</a>
-<a href="https://linkedin.com/in/nico-tukiainen" target="_blank" rel="noopener noreferrer"><FaLinkedin /> LinkedIn: linkedin.com/in/nico-tukiainen</a>
-<a href="https://twitter.com/NicoTukiainen" target="_blank" rel="noopener noreferrer"><FaTwitter /> Twitter: twitter.com/NicoTukiainen</a>
+<a href="mailto:nico.tukiainen@gmail.com" target="_blank" rel="noopener noreferrer" class="contact-link"><span class="contact-icon">📧</span> Email: nico.tukiainen@gmail.com</a>
+<a href="https://github.com/Ntuk" target="_blank" rel="noopener noreferrer" class="contact-link"><span class="contact-icon">🐙</span> GitHub: github.com/Ntuk</a>
+<a href="https://linkedin.com/in/nico-tukiainen" target="_blank" rel="noopener noreferrer" class="contact-link"><span class="contact-icon">💼</span> LinkedIn: linkedin.com/in/nico-tukiainen</a>
+<a href="https://facebook.com/nico.tukiainen" target="_blank" rel="noopener noreferrer" class="contact-link"><span class="contact-icon">👤</span> Facebook: facebook.com/nico.tukiainen</a>
 
-[END TRANSMISSION]
+<span class="header-green">[END TRANSMISSION]</span>
 ==================================`;
       case 'clear':
         // Clear the terminal
@@ -331,7 +341,7 @@ Technologies: Vue, Node.js, Firebase
             <div className="terminal-button minimize" onClick={() => setIsMinimized(true)}></div>
             <div className="terminal-button maximize"></div>
           </div>
-          <div className="terminal-title">NICO.EXE</div>
+          <div className="terminal-title">NICO_TUKIAINEN.EXE</div>
         </div>
         
         <div className="terminal-body" ref={terminalRef}>
@@ -349,7 +359,7 @@ Technologies: Vue, Node.js, Firebase
           
           {commandHistory.map((cmd, index) => (
             <div key={`cmd-${index}`} className="terminal-line">
-              <span className="prompt">guest@synthwave:~$</span> {cmd}
+              <span className="prompt">guest@retrowave:~$</span> {cmd}
             </div>
           ))}
           
@@ -364,7 +374,7 @@ Technologies: Vue, Node.js, Firebase
                 />
               ) : (
                 typeof response.text === 'string' ? (
-                  <pre>{response.text}</pre>
+                  <pre dangerouslySetInnerHTML={{ __html: response.text }}></pre>
                 ) : (
                   response.text
                 )
@@ -373,7 +383,7 @@ Technologies: Vue, Node.js, Firebase
           ))}
           
           <div className="terminal-input-line">
-            <span className="prompt">guest@synthwave:~$</span>
+            <span className="prompt">guest@retrowave:~$</span>
             <input
               ref={inputRef}
               type="text"

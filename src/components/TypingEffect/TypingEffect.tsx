@@ -1,56 +1,67 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './TypingEffect.scss';
 
 interface TypingEffectProps {
   text: string;
   speed?: number;
   delay?: number;
-  cursor?: boolean;
   onComplete?: () => void;
 }
 
-function TypingEffect({ 
+const TypingEffect: React.FC<TypingEffectProps> = ({ 
   text, 
   speed = 50, 
-  delay = 1000, 
-  cursor = true,
+  delay = 0,
   onComplete 
-}: TypingEffectProps) {
+}) => {
   const [displayText, setDisplayText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
+  const [isDelayed, setIsDelayed] = useState(delay > 0);
+  
+  // Process HTML tags in the text
+  const processedText = text.includes('<span class="header') ? 
+    text : 
+    text;
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    
-    // Initial delay before typing starts
-    if (!isTyping && currentIndex === 0) {
-      timeout = setTimeout(() => {
-        setIsTyping(true);
+    if (isDelayed) {
+      const delayTimeout = setTimeout(() => {
+        setIsDelayed(false);
       }, delay);
+      
+      return () => clearTimeout(delayTimeout);
     }
     
-    // Typing effect
-    if (isTyping && currentIndex < text.length) {
-      timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
+    if (currentIndex < processedText.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText(prev => prev + processedText[currentIndex]);
         setCurrentIndex(prev => prev + 1);
+        
+        // Trigger scroll after each character
+        scrollToBottom();
       }, speed);
-    } else if (isTyping && currentIndex === text.length && onComplete) {
-      timeout = setTimeout(() => {
-        onComplete();
-      }, 500);
+      
+      return () => clearTimeout(timeout);
+    } else if (onComplete) {
+      onComplete();
     }
-    
-    return () => clearTimeout(timeout);
-  }, [text, speed, delay, currentIndex, isTyping, onComplete]);
+  }, [currentIndex, processedText, speed, delay, isDelayed, onComplete]);
+
+  // Function to scroll the terminal to the bottom
+  const scrollToBottom = () => {
+    // Find the closest terminal body element
+    const terminalBody = document.querySelector('.terminal-body');
+    if (terminalBody) {
+      terminalBody.scrollTop = terminalBody.scrollHeight;
+    }
+  };
 
   return (
-    <div className="typing-effect">
-      <span className="typing-text">{displayText}</span>
-      {cursor && <span className={`typing-cursor ${isTyping ? 'blinking' : ''}`}>_</span>}
+    <div className="typing-container">
+      <pre className="typing-effect" dangerouslySetInnerHTML={{ __html: displayText }}></pre>
+      <span className="cursor"></span>
     </div>
   );
-}
+};
 
 export default TypingEffect; 

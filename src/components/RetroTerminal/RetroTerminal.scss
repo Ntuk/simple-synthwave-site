@@ -293,4 +293,84 @@
       }
     }
   }
+}
+
+/* Colored section headers */
+.header-green {
+  color: #05ffa1;
+  font-weight: bold;
+}
+
+.project-number {
+  color: #05ffa1;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.header-system {
+  color: #ff71ce;
+  font-weight: bold;
+}
+
+.header-core {
+  color: #01cdfe;
+  font-weight: bold;
+}
+
+.header-education {
+  color: #05ffa1;
+  font-weight: bold;
+}
+
+.header-runtime {
+  color: #b967ff;
+  font-weight: bold;
+}
+
+.header-end {
+  color: #fffb96;
+  font-weight: bold;
+}
+
+.header-init {
+  color: #ff71ce;
+  font-weight: bold;
+}
+
+.header-frontend {
+  color: #01cdfe;
+  font-weight: bold;
+}
+
+.header-backend {
+  color: #05ffa1;
+  font-weight: bold;
+}
+
+.header-toolkit {
+  color: #b967ff;
+  font-weight: bold;
+}
+
+.header-success {
+  color: #fffb96;
+  font-weight: bold;
+}
+
+.contact-link {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.25rem 0;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: #f672ca;
+    transform: translateX(5px);
+  }
+}
+
+.contact-icon {
+  color: #f672ca;
+  margin-right: 0.5rem;
 } 
