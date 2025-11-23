@@ -231,6 +231,7 @@ When not optimizing code or debugging the matrix, this unit can be found:
 > Executing physical_exercise.bat
 > Running travel_adventures.exe with wife.instance
 > Exploring new tech_stacks.json
+> Rendering pixel worlds in godot_engine.gd
 
 <span class="header-green">[END TRANSMISSION]</span>
 `;
@@ -256,7 +257,7 @@ When not optimizing code or debugging the matrix, this unit can be found:
 > BUILD SYSTEMS
   - Vite [Hyperspeed Compiler]
   - Webpack [Bundle Master]
-  - NPM/Yarn [Package Command]
+  - NPM/PNPM/Yarn [Package Command]
 
 <span class="header-green">[BACKEND POWERHOUSE]</span>
 > SERVER TECHNOLOGIES
@@ -293,12 +294,13 @@ When not optimizing code or debugging the matrix, this unit can be found:
 ==================================
 
 Notable Projects:
-<span class="project-number">1.</span> Smart Recipe Meal Planner - AI-powered meal suggestions
-<span class="project-number">2.</span> Crypto Trading Bot - Automated trading system
-<span class="project-number">3.</span> Coinbase API Proxy - Secure AWS Lambda middleware
-<span class="project-number">4.</span> Simple Synthwave Site - This retro portfolio
-<span class="project-number">5.</span> Hiljaisen Sillan Kennel - Modern kennel website
-<span class="project-number">6.</span> AFPS Finland - Gaming community platform
+<span class="project-number">1.</span> Pondemonium - 2D puzzle-platformer released on Steam
+<span class="project-number">2.</span> Smart Recipe Meal Planner - AI-powered meal suggestions
+<span class="project-number">3.</span> Crypto Trading Bot - Automated trading system
+<span class="project-number">4.</span> Coinbase API Proxy - Secure AWS Lambda middleware
+<span class="project-number">5.</span> Simple Synthwave Site - This retro portfolio
+<span class="project-number">6.</span> Hiljaisen Sillan Kennel - Modern kennel website
+<span class="project-number">7.</span> AFPS Finland - Gaming community platform
 
 Type 'project 1', 'project 2', etc. for more details.
 <span class="header-green">[END DATABASE]</span>
@@ -308,11 +310,21 @@ Type 'project 1', 'project 2', etc. for more details.
 <span class="header-green">[PROJECT DETAILS: 01]</span>
 ==================================
 
-Smart Recipe Meal Planner:
-A microservices-based meal planning application that suggests recipes
-based on available ingredients, dietary preferences, and user history.
-Intelligent meal recommendations with shopping list generation.
-Technologies: TypeScript, Microservices, AI/ML
+<span class="header-green">Pondemonium</span> (Steam Release)
+A charming 2D puzzle-platformer where three determined ducks waddle, jump, and quack their way through dangerous levels to restore their homeland. The once crystal-clear ponds have been poisoned, and only by recovering their own colored eggs can the ducks purify the waters and bring life back to the land.
+
+<span class="header-green">Features</span>
+- Play as three ducks, each with special abilities: Chuck Duck, Mac Mallard, and Peggy Pekin.
+- Collect each duck’s colored egg to purify poisoned ponds and complete each level.
+- Handcrafted levels full of hazards and environmental puzzles.
+- Physics-based contraptions: boulders, levers, switches, trapdoors.
+- Deadly enemies: saws, vultures, and twisted machines left by saboteurs.
+- Leaderboards for extra replayability.
+
+Written in Godot 4.3.
+Perfect for fans of classic platformers, blending lighthearted humor with challenging gameplay.
+
+<span class="header-green">[STEAM]</span> <a href="https://store.steampowered.com/app/4001620/Pondemonium/" target="_blank" rel="noopener">View on Steam</a>
 ==================================
 `;
       case 'project 2':
@@ -320,11 +332,11 @@ Technologies: TypeScript, Microservices, AI/ML
 <span class="header-green">[PROJECT DETAILS: 02]</span>
 ==================================
 
-Crypto Trading Bot:
-An automated trading system designed for executing trades based on 
-market signals and custom strategies. Features real-time data analysis,
-risk management, and multi-exchange integration.
-Technologies: TypeScript, Node.js, WebSocket
+<span class="header-green">Smart Recipe Meal Planner</span>:
+A microservices-based meal planning application that suggests recipes
+based on available ingredients, dietary preferences, and user history.
+Intelligent meal recommendations with shopping list generation.
+Technologies: TypeScript, Microservices, AI/ML
 ==================================
 `;
       case 'project 3':
@@ -332,11 +344,11 @@ Technologies: TypeScript, Node.js, WebSocket
 <span class="header-green">[PROJECT DETAILS: 03]</span>
 ==================================
 
-Coinbase API Proxy:
-A lightweight AWS Lambda proxy serving as a secure middleware between 
-trading bots and external services. Handles trade execution, market data,
-and provides a scalable interface for crypto operations.
-Technologies: TypeScript, AWS Lambda, API Gateway
+<span class="header-green">Crypto Trading Bot</span>:
+An automated trading system designed for executing trades based on 
+market signals and custom strategies. Features real-time data analysis,
+risk management, and multi-exchange integration.
+Technologies: TypeScript, Node.js, WebSocket
 ==================================
 `;
       case 'project 4':
@@ -344,11 +356,11 @@ Technologies: TypeScript, AWS Lambda, API Gateway
 <span class="header-green">[PROJECT DETAILS: 04]</span>
 ==================================
 
-Simple Synthwave Site:
-A minimal, fast, and fully responsive personal website built with 
-modern web technologies. Features clean design, smooth CSS animations,
-and that unmistakable 80's synthwave aesthetic.
-Technologies: HTML, SCSS, JavaScript
+<span class="header-green">Coinbase API Proxy</span>:
+A lightweight AWS Lambda proxy serving as a secure middleware between 
+trading bots and external services. Handles trade execution, market data,
+and provides a scalable interface for crypto operations.
+Technologies: TypeScript, AWS Lambda, API Gateway
 ==================================
 `;
       case 'project 5':
@@ -356,11 +368,11 @@ Technologies: HTML, SCSS, JavaScript
 <span class="header-green">[PROJECT DETAILS: 05]</span>
 ==================================
 
-Hiljaisen Sillan Kennel:
-A modern, responsive website built for a dachshund breeding kennel.
-Features information about available puppies, breeding ethics, and 
-detailed contact information. Clean design with intuitive navigation.
-Technologies: TypeScript, React, SCSS
+<span class="header-green">Simple Synthwave Site</span>:
+A minimal, fast, and fully responsive personal website built with 
+modern web technologies. Features clean design, smooth CSS animations,
+and that unmistakable 80's synthwave aesthetic.
+Technologies: HTML, SCSS, JavaScript
 ==================================
 `;
       case 'project 6':
@@ -368,7 +380,19 @@ Technologies: TypeScript, React, SCSS
 <span class="header-green">[PROJECT DETAILS: 06]</span>
 ==================================
 
-AFPS Finland:
+<span class="header-green">Hiljaisen Sillan Kennel</span>:
+A modern, responsive website built for a dachshund breeding kennel.
+Features information about available puppies, breeding ethics, and 
+detailed contact information. Clean design with intuitive navigation.
+Technologies: TypeScript, React, SCSS
+==================================
+`;
+      case 'project 7':
+        return `
+<span class="header-green">[PROJECT DETAILS: 07]</span>
+==================================
+
+<span class="header-green">AFPS Finland</span>:
 A community website for Finnish arena FPS gaming enthusiasts.
 Provides news, events, and resources for the fast-paced FPS community.
 Features tournament tracking and community engagement tools.
@@ -451,6 +475,10 @@ Example: theme hacker
         setHasClickedTerminal(false);
         return `Hint reset successful. Reload the page to see the hint again.`;
       default:
+        // Allow just the number (e.g., '1', '2', etc.) for project details
+        if (/^[1-7]$/.test(cmd)) {
+          return getCommandResponse('project ' + cmd);
+        }
         if (cmd.startsWith('project ')) {
           return `Project details not found. Try 'projects' to see the list.`;
         }
@@ -586,8 +614,8 @@ Example: theme hacker
               {response.isTyping && typeof response.text === 'string' ? (
                 <TypingEffect 
                   text={response.text} 
-                  speed={7} 
-                  delay={200} 
+                  speed={3} 
+                  delay={25} 
                   onComplete={() => handleResponseComplete(index)} 
                 />
               ) : (
@@ -618,4 +646,4 @@ Example: theme hacker
   );
 });
 
-export default RetroTerminal; 
+export default RetroTerminal;

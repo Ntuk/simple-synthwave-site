@@ -3,15 +3,17 @@ import './TypingEffect.scss';
 
 interface TypingEffectProps {
   text: string;
-  speed?: number;
-  delay?: number;
+  speed?: number; // interval duration in ms
+  delay?: number; // initial delay before typing starts
+  chunkSize?: number; // how many characters to append per interval
   onComplete?: () => void;
 }
 
 const TypingEffect: React.FC<TypingEffectProps> = ({ 
   text, 
-  speed = 50, 
+  speed = 25, 
   delay = 0,
+  chunkSize = 1,
   onComplete 
 }) => {
   const [displayText, setDisplayText] = useState('');
@@ -34,18 +36,17 @@ const TypingEffect: React.FC<TypingEffectProps> = ({
     
     if (currentIndex < processedText.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + processedText[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-        
-        // Trigger scroll after each character
+        const nextIndex = Math.min(currentIndex + chunkSize, processedText.length);
+        const nextChunk = processedText.slice(currentIndex, nextIndex);
+        setDisplayText(prev => prev + nextChunk);
+        setCurrentIndex(nextIndex);
         scrollToBottom();
       }, speed);
-      
       return () => clearTimeout(timeout);
     } else if (onComplete) {
       onComplete();
     }
-  }, [currentIndex, processedText, speed, delay, isDelayed, onComplete]);
+  }, [currentIndex, processedText, speed, delay, chunkSize, isDelayed, onComplete]);
 
   // Function to scroll the terminal to the bottom
   const scrollToBottom = () => {
