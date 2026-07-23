@@ -64,21 +64,32 @@ jobs:
         run: |
           if [ "$DRY_RUN" = "true" ]; then EXTRA="--dry-run --verbose"; else EXTRA=""; fi
           DEST="$SSH_USER@$SSH_HOST:${DEPLOY_PATH%/}/"
-          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes"
+          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes -o ConnectTimeout=30 -o ServerAliveInterval=15"
 
-          rsync -az $EXTRA -e "$SSH_CMD" \
+          # Shared-host SSH occasionally drops the connection; retry a few times
+          # with backoff so a single timeout doesn't fail the whole deploy.
+          retry() {
+            for attempt in 1 2 3 4; do
+              "$@" && return 0
+              echo "attempt $attempt failed, retrying in $((attempt*20))s..."
+              sleep $((attempt*20))
+            done
+            echo "all attempts failed"; return 1
+          }
+
+          retry rsync -az $EXTRA -e "$SSH_CMD" \
             --exclude 'assets/' --exclude 'api/' \
             dist/ "$DEST"
 
-          rsync -az --delete $EXTRA -e "$SSH_CMD" \
+          retry rsync -az --delete $EXTRA -e "$SSH_CMD" \
             dist/assets/ "${DEST}assets/"
 
-          rsync -az --delete $EXTRA -e "$SSH_CMD" \
+          retry rsync -az --delete $EXTRA -e "$SSH_CMD" \
             --exclude 'config.php' \
             dist/api/ "${DEST}api/"
 
           # opcache serves stale bytecode after a deploy, so bump the PHP file
           # timestamps to force it to recompile on the next request.
           if [ "$DRY_RUN" != "true" ]; then
-            $SSH_CMD "$SSH_USER@$SSH_HOST" "touch ${DEPLOY_PATH%/}/api/*.php"
+            retry $SSH_CMD "$SSH_USER@$SSH_HOST" "touch ${DEPLOY_PATH%/}/api/*.php"
           fi
