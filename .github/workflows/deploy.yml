@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
 
-# Two deploys rsyncing at once would race on the same directory.
+# Two deploys uploading at once would corrupt the sync-state file.
 concurrency:
   group: deploy
   cancel-in-progress: false
@@ -33,63 +33,29 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
-      # The PHP API ships next to the built SPA so one sync covers both.
-      # config.php holds the live DB credentials and is not in the repo.
+      # The PHP API ships next to the built SPA so one upload covers both.
+      # config.php holds the live DB credentials and stays on the server only.
       - name: Stage API alongside the build
         run: |
           mkdir -p dist/api
           rsync -a --exclude 'config.php' --exclude 'schema.sql' api/ dist/api/
 
-      - name: Configure SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-
-      # public_html also hosts unrelated sites (games/, projects/, evolver/, ...)
-      # and the uploaded trip photos, so the root sync is additive and never
-      # deletes. --delete is scoped to the two directories this repo fully owns,
-      # which is what clears out stale hashed bundles.
-      - name: Deploy
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DRY_RUN: ${{ inputs.dry_run }}
-        run: |
-          if [ "$DRY_RUN" = "true" ]; then EXTRA="--dry-run --verbose"; else EXTRA=""; fi
-          DEST="$SSH_USER@$SSH_HOST:${DEPLOY_PATH%/}/"
-          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes -o ConnectTimeout=30 -o ServerAliveInterval=15"
-
-          # Shared-host SSH occasionally drops the connection; retry a few times
-          # with backoff so a single timeout doesn't fail the whole deploy.
-          retry() {
-            for attempt in 1 2 3 4; do
-              "$@" && return 0
-              echo "attempt $attempt failed, retrying in $((attempt*20))s..."
-              sleep $((attempt*20))
-            done
-            echo "all attempts failed"; return 1
-          }
-
-          retry rsync -az $EXTRA -e "$SSH_CMD" \
-            --exclude 'assets/' --exclude 'api/' \
-            dist/ "$DEST"
-
-          retry rsync -az --delete $EXTRA -e "$SSH_CMD" \
-            dist/assets/ "${DEST}assets/"
-
-          retry rsync -az --delete $EXTRA -e "$SSH_CMD" \
-            --exclude 'config.php' \
-            dist/api/ "${DEST}api/"
-
-          # opcache serves stale bytecode after a deploy, so bump the PHP file
-          # timestamps to force it to recompile on the next request.
-          if [ "$DRY_RUN" != "true" ]; then
-            retry $SSH_CMD "$SSH_USER@$SSH_HOST" "touch ${DEPLOY_PATH%/}/api/*.php"
-          fi
+      # Hostinger blocks SSH from datacenter IPs, so deploy over FTPS instead.
+      # The action tracks only the files it uploads via a sync-state file on the
+      # server, so it never touches the other sites in public_html (games/,
+      # projects/, uploads/, ...) or api/config.php, which it never uploaded.
+      # It does clean up old hashed bundles it previously uploaded to assets/.
+      - name: Deploy over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./dist/
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          dry-run: ${{ inputs.dry_run == true }}
+          exclude: |
+            **/.git*
+            **/.git*/**
