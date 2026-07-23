@@ -1,7 +1,7 @@
 import ReactGA from 'react-ga4';
 
-// Replace this with your actual GA4 Measurement ID when you create one in Google Analytics
-const GA_MEASUREMENT_ID = 'G-JXKXX48JPQ';
+// GA4 Measurement ID for the nicotukiainen.com web stream
+const GA_MEASUREMENT_ID = 'G-KNR7CH1EKW';
 
 // Initialize Google Analytics
 export const initGA = (): void => {
