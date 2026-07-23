@@ -25,7 +25,7 @@
   width: 15vmin;
   border-radius: 50%;
   filter: drop-shadow(0 0 15px white);
-  transform: translateY(-32vmin) rotate(-20deg);
+  animation: shoot-r 10s linear infinite both;
 }
 
 .startail-l {
@@ -42,7 +42,7 @@
   width: 17vmin;
   border-radius: 50%;
   filter: drop-shadow(0 0 15px white);
-  transform: translateY(-7vmin) rotate(-20deg);
+  animation: shoot-l 12s 4s linear infinite both;
 }
 
 .startail-m {
@@ -59,8 +59,61 @@
   width: 14vmin;
   border-radius: 50%;
   filter: drop-shadow(0 0 15px white);
-  transform: translateY(-18vmin) rotate(-20deg);
-  opacity: 0.5;
+  animation: shoot-m 14s 8s linear infinite both;
+}
+
+// Each streak falls along its own -20deg axis (down and to the left), then
+// stays parked off-screen (opacity 0) for the rest of the cycle so shooting
+// stars stay occasional.
+@keyframes shoot-r {
+  0% { opacity: 0; transform: translateY(-32vmin) rotate(-20deg) translateX(55vmin); }
+  4% { opacity: 1; }
+  24% { opacity: 0; transform: translateY(-32vmin) rotate(-20deg) translateX(-55vmin); }
+  100% { opacity: 0; transform: translateY(-32vmin) rotate(-20deg) translateX(-55vmin); }
+}
+
+@keyframes shoot-l {
+  0% { opacity: 0; transform: translateY(-7vmin) rotate(-20deg) translateX(80vmin); }
+  4% { opacity: 1; }
+  24% { opacity: 0; transform: translateY(-7vmin) rotate(-20deg) translateX(-45vmin); }
+  100% { opacity: 0; transform: translateY(-7vmin) rotate(-20deg) translateX(-45vmin); }
+}
+
+@keyframes shoot-m {
+  0% { opacity: 0; transform: translateY(-18vmin) rotate(-20deg) translateX(85vmin); }
+  4% { opacity: 0.6; }
+  24% { opacity: 0; transform: translateY(-18vmin) rotate(-20deg) translateX(-40vmin); }
+  100% { opacity: 0; transform: translateY(-18vmin) rotate(-20deg) translateX(-40vmin); }
+}
+
+// Extra streaks scattered elsewhere in the sky. They share one keyframe and
+// differ only by CSS variables: --ty is the height off the bottom, --x0/--x1
+// the travel endpoints, plus per-star timing and peak opacity.
+.startail-x {
+  position: absolute;
+  bottom: 0;
+  height: 0.2vmin;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 15px white);
+  background: linear-gradient(
+                  to right,
+                  var(--labs-sys-color-sun-glow) 10%,
+                  var(--labs-sys-color-triangle) 50%,
+                  transparent 80%
+  );
+  animation: shoot var(--dur) var(--delay) linear infinite both;
+}
+
+.startail-x1 { left: 82vw; width: 16vmin; --ty: -58vmin; --x0: 60vmin; --x1: -60vmin; --dur: 11s; --delay: 2s; --peak: 1; }
+.startail-x2 { left: 48vw; width: 13vmin; --ty: -70vmin; --x0: 70vmin; --x1: -50vmin; --dur: 13s; --delay: 6s; --peak: 0.7; }
+.startail-x3 { left: 90vw; width: 18vmin; --ty: -28vmin; --x0: 55vmin; --x1: -70vmin; --dur: 9s; --delay: 10s; --peak: 1; }
+.startail-x4 { left: 8vw; width: 14vmin; --ty: -64vmin; --x0: 75vmin; --x1: -45vmin; --dur: 15s; --delay: 13s; --peak: 0.6; }
+
+@keyframes shoot {
+  0% { opacity: 0; transform: translateY(var(--ty)) rotate(-20deg) translateX(var(--x0)); }
+  4% { opacity: var(--peak); }
+  24% { opacity: 0; transform: translateY(var(--ty)) rotate(-20deg) translateX(var(--x1)); }
+  100% { opacity: 0; transform: translateY(var(--ty)) rotate(-20deg) translateX(var(--x1)); }
 }
 
 // ✨
