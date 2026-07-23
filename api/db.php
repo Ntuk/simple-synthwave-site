@@ -64,6 +64,9 @@ function trip_blocks(PDO $pdo, array $t): array {
 }
 
 function format_trip(PDO $pdo, array $t): array {
+    // This DB has the columns named MONTH/YEAR in uppercase, and PHP array keys
+    // are case-sensitive, so normalize the row before reading fields by name.
+    $t = array_change_key_case($t, CASE_LOWER);
     $blocks = trip_blocks($pdo, $t);
 
     $cover = null;
