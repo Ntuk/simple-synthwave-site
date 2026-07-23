@@ -42,7 +42,8 @@
   position: absolute;
   bottom: 0;
   z-index: 10000;
-  animation: kode-text 4s linear infinite;
+  // Default variant; Logo.tsx swaps the animation-name each loop for variety.
+  animation: kode-glitch-a 4s linear infinite;
   perspective: 40px;
 
   &:after {
@@ -58,40 +59,68 @@
     transform: rotate(347deg);
   }
 }
-// glitch effect
-@keyframes kode-text {
-  from {
-    --angle: 45deg;
-    transform: translateY(-0vh);
-  }
+// Glitch variants. Every variant shares the same resting state at from/to
+// (--angle 45deg, no offset, normal brightness) so Logo.tsx can swap between
+// them at the loop boundary without any visible jump.
 
-  49.5% {
-    --angle: 360deg;
-    transform: translateY(-1vh);
-    filter: brightness(100%);
-  }
-  50% {
-    --angle: 360deg;
-    transform: translateY(-1vh) scaleY(0.1) skewX(253deg);
-    filter: brightness(190%);
-  }
+.kode-text {
+  &.v-a { animation-name: kode-glitch-a; }
+  &.v-b { animation-name: kode-glitch-b; }
+  &.v-c { animation-name: kode-glitch-c; }
+  &.v-d { animation-name: kode-glitch-d; }
+  &.v-clean { animation-name: kode-glitch-clean; }
+}
 
-  51% {
-    --angle: 360deg;
-    transform: translateY(-1vh) scaleY(0.5) skewY(37deg);
-    filter: brightness(190%);
-  }
+// A: the original squash-and-skew
+@keyframes kode-glitch-a {
+  from { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+  49.5% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(100%); }
+  50% { --angle: 360deg; transform: translateY(-1vh) scaleY(0.1) skewX(253deg); filter: brightness(190%); }
+  51% { --angle: 360deg; transform: translateY(-1vh) scaleY(0.5) skewY(37deg); filter: brightness(190%); }
+  52% { --angle: 360deg; transform: translateY(0); filter: brightness(190%); }
+  to { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+}
 
-  52% {
-    --angle: 360deg;
-    filter: brightness(190%);
-    transform: translateY(-0vh);
-  }
+// B: horizontal tear with a hue shift
+@keyframes kode-glitch-b {
+  from { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+  49.5% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(100%); }
+  50% { --angle: 360deg; transform: translateY(-1vh) translateX(-3vmin) skewX(-24deg); filter: brightness(60%) hue-rotate(-25deg); }
+  50.6% { --angle: 360deg; transform: translateY(-1vh) translateX(4vmin) skewX(18deg); filter: brightness(220%) hue-rotate(25deg); }
+  51.4% { --angle: 360deg; transform: translateY(-1vh) translateX(-1vmin); filter: brightness(140%); }
+  52% { --angle: 360deg; transform: translateY(0); filter: brightness(110%); }
+  to { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+}
 
-  to {
-    --angle: 45deg;
-    transform: translateY(-0vh);
-  }
+// C: vertical stretch then squash
+@keyframes kode-glitch-c {
+  from { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+  49.5% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(100%); }
+  50% { --angle: 360deg; transform: translateY(-1.6vh) scaleY(1.7); filter: brightness(200%); }
+  50.7% { --angle: 360deg; transform: translateY(-0.4vh) scaleY(0.35); filter: brightness(70%); }
+  51.5% { --angle: 360deg; transform: translateY(-1vh) scaleY(1.08); filter: brightness(160%); }
+  52% { --angle: 360deg; transform: translateY(0); filter: brightness(120%); }
+  to { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+}
+
+// D: rapid strobe / jitter
+@keyframes kode-glitch-d {
+  from { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+  49.5% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(100%); }
+  49.8% { --angle: 360deg; transform: translateY(-1vh) translateX(0.6vmin); filter: brightness(250%); }
+  50.1% { --angle: 360deg; transform: translateY(-1vh) translateX(-0.7vmin) skewX(9deg); filter: brightness(50%); }
+  50.4% { --angle: 360deg; transform: translateY(-1vh) translateX(0.5vmin); filter: brightness(240%); }
+  50.7% { --angle: 360deg; transform: translateY(-1vh) translateX(-0.4vmin) skewX(-6deg); filter: brightness(80%); }
+  51.2% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(180%); }
+  52% { --angle: 360deg; transform: translateY(0); filter: brightness(120%); }
+  to { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+}
+
+// Clean: no glitch, just the gradient sweep and float
+@keyframes kode-glitch-clean {
+  from { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
+  50% { --angle: 360deg; transform: translateY(-1vh); filter: brightness(115%); }
+  to { --angle: 45deg; transform: translateY(0); filter: brightness(100%); }
 }
 
 
