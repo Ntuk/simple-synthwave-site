@@ -1,0 +1,78 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'List what would change without uploading anything'
+        type: boolean
+        default: false
+
+# Two deploys rsyncing at once would race on the same directory.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      # The PHP API ships next to the built SPA so one sync covers both.
+      # config.php holds the live DB credentials and is not in the repo.
+      - name: Stage API alongside the build
+        run: |
+          mkdir -p dist/api
+          rsync -a --exclude 'config.php' --exclude 'schema.sql' api/ dist/api/
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # public_html also hosts unrelated sites (games/, projects/, evolver/, ...)
+      # and the uploaded trip photos, so the root sync is additive and never
+      # deletes. --delete is scoped to the two directories this repo fully owns,
+      # which is what clears out stale hashed bundles.
+      - name: Deploy
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then EXTRA="--dry-run --verbose"; else EXTRA=""; fi
+          DEST="$SSH_USER@$SSH_HOST:${DEPLOY_PATH%/}/"
+          SSH_CMD="ssh -p $SSH_PORT -o StrictHostKeyChecking=yes"
+
+          rsync -az $EXTRA -e "$SSH_CMD" \
+            --exclude 'assets/' --exclude 'api/' \
+            dist/ "$DEST"
+
+          rsync -az --delete $EXTRA -e "$SSH_CMD" \
+            dist/assets/ "${DEST}assets/"
+
+          rsync -az --delete $EXTRA -e "$SSH_CMD" \
+            --exclude 'config.php' \
+            dist/api/ "${DEST}api/"
