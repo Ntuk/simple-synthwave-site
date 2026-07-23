@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TypingEffect from '../TypingEffect/TypingEffect';
 import { FaTerminal } from 'react-icons/fa';
 import './RetroTerminal.scss';
@@ -29,6 +30,7 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const welcomeMessage = `
 > WELCOME TO NICO'S TERMINAL v1.0
@@ -202,6 +204,7 @@ Available commands:
 - about: Learn about Nico
 - skills: See my technical skills
 - projects: View my projects
+- travels: Browse my travel blog
 - contact: How to reach me
 - matrix: Activate the matrix
 - game: Play a number guessing game
@@ -410,6 +413,16 @@ Technologies: Vue, Node.js, Firebase
 <a href="https://facebook.com/nico.tukiainen" target="_blank" rel="noopener noreferrer" class="contact-link"><span class="contact-icon">👤</span> Facebook: facebook.com/nico.tukiainen</a>
 
 <span class="header-green">[END TRANSMISSION]</span>
+==================================`;
+      case 'travels':
+        // Navigate to the travel blog page
+        setTimeout(() => {
+          navigate('/travels');
+        }, 600);
+        return `<span class="header-green">[LOADING TRAVEL LOG...]</span>
+==================================
+Plotting coordinates...
+Opening the travel blog.
 ==================================`;
       case 'clear':
         // Clear the terminal

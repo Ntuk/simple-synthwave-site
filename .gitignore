@@ -25,3 +25,7 @@ dist-ssr
 
 # Others
 GA_SETUP.md
+
+# Backend secrets and uploaded content
+api/config.php
+uploads/

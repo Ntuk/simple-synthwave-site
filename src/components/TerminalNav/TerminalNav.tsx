@@ -1,5 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaMapMarkedAlt } from 'react-icons/fa';
 import TerminalLink from '../TerminalLink/TerminalLink';
+import '../TerminalLink/TerminalLink.scss';
 import './TerminalNav.scss';
 import { RetroTerminalHandle } from '../RetroTerminal/RetroTerminal';
 
@@ -29,11 +32,16 @@ const TerminalNav: React.FC<TerminalNavProps> = ({ terminalRef }) => {
         command="projects" 
         onCommandTrigger={handleCommand} 
       />
-      <TerminalLink 
-        label="Contact" 
-        command="contact" 
-        onCommandTrigger={handleCommand} 
+      <TerminalLink
+        label="Contact"
+        command="contact"
+        onCommandTrigger={handleCommand}
       />
+      <Link to="/travels" className="terminal-link">
+        <FaMapMarkedAlt className="terminal-link-icon" />
+        <span className="terminal-link-text">Travels</span>
+        <span className="terminal-link-command">/travels</span>
+      </Link>
     </nav>
   );
 };

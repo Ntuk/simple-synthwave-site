@@ -1,0 +1,32 @@
+.synth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--labs-sys-color-background, #111);
+
+  &__top {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+
+    // Match the sun sizing/placement used on the home hero.
+    .sun {
+      margin-bottom: -2vmin;
+    }
+  }
+
+  // Fade the grid/sun so foreground content stays readable on top of it.
+  &__veil {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgba(17, 17, 17, 0) 30%, rgba(17, 17, 17, 0.72) 72%),
+      linear-gradient(180deg, rgba(13, 5, 23, 0.55) 0%, rgba(13, 5, 23, 0.85) 100%);
+  }
+}

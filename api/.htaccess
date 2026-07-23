@@ -1,0 +1,4 @@
+# Never serve the config or SQL files directly.
+<FilesMatch "^(config\.php|config\.example\.php|schema\.sql)$">
+  Require all denied
+</FilesMatch>

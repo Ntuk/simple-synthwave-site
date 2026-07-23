@@ -1,0 +1,288 @@
+$pink: #f672ca;
+$cyan: #6eccee;
+$green: #05ffa1;
+$purple: #b967ff;
+
+$body-font: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+$pixel-font: 'VT323', monospace;
+
+.admin {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 2rem clamp(1rem, 5vw, 4rem) 5rem;
+  color: #f0f0f0;
+  font-family: $body-font;
+
+  // Re-enable selection/typing over the retro global `user-select: none`.
+  &, & * { user-select: text; }
+
+  &__topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  &__back {
+    font-family: $pixel-font;
+    color: $cyan;
+    text-decoration: none;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+
+    &:hover { color: $pink; }
+  }
+
+  &__title {
+    font-family: $pixel-font;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: $pink;
+    text-shadow: 0 0 14px rgba(246, 114, 202, 0.6);
+    margin: 0 0 2rem;
+    text-align: center;
+  }
+
+  &__panel {
+    max-width: 720px;
+    margin: 0 auto;
+    border: 1px solid rgba(246, 114, 202, 0.5);
+    border-radius: 10px;
+    background: rgba(20, 10, 30, 0.72);
+    box-shadow: 0 0 20px rgba(255, 0, 170, 0.25);
+    backdrop-filter: blur(4px);
+    padding: 2rem;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+
+    label {
+      font-family: $pixel-font;
+      color: $cyan;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+    }
+
+    input, textarea, select {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(110, 204, 238, 0.4);
+      border-radius: 6px;
+      color: #fff;
+      font-family: $body-font;
+      font-size: 1rem;
+      padding: 0.6rem 0.8rem;
+      outline: none;
+
+      &:focus { border-color: $pink; box-shadow: 0 0 10px rgba(246, 114, 202, 0.4); }
+    }
+  }
+
+  &__row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  // ----- Block editor -----
+  &__blocks-label {
+    font-family: $pixel-font;
+    color: $cyan;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.75rem;
+  }
+
+  &__blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  &__blocks-empty {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.95rem;
+    padding: 1rem;
+    border: 1px dashed rgba(110, 204, 238, 0.3);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  &__block {
+    position: relative;
+    border: 1px solid rgba(110, 204, 238, 0.25);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.25);
+  }
+
+  &__block-controls {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.3rem;
+
+    button {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(110, 204, 238, 0.4);
+      border-radius: 5px;
+      color: $cyan;
+      font-size: 0.95rem;
+      cursor: pointer;
+      line-height: 1;
+
+      &:hover:not(:disabled) { border-color: $pink; color: $pink; }
+      &:disabled { opacity: 0.3; cursor: not-allowed; }
+    }
+  }
+
+  &__block-remove { color: #ff5f7e !important; border-color: rgba(255, 95, 126, 0.4) !important; }
+
+  &__block-text {
+    width: 100%;
+    min-height: 110px;
+    resize: vertical;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(110, 204, 238, 0.4);
+    border-radius: 6px;
+    color: #fff;
+    font-family: $body-font;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0.6rem 0.8rem;
+    padding-right: 6rem;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus { border-color: $pink; }
+  }
+
+  &__block-image {
+    width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+  }
+
+  &__add-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__add-photo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  &__button {
+    width: 100%;
+    background: linear-gradient(90deg, #ff00aa, #b967ff);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: $pixel-font;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    padding: 0.6rem;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.15s ease;
+
+    &:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    & + & { margin-top: 0.6rem; }
+  }
+
+  &__secondary {
+    background: transparent;
+    border: 1px solid rgba(110, 204, 238, 0.5);
+    color: $cyan;
+    font-family: $pixel-font;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    padding: 0.45rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover { border-color: $pink; color: $pink; }
+  }
+
+  &__message {
+    text-align: center;
+    font-size: 1rem;
+    margin-top: 1rem;
+    letter-spacing: 0.5px;
+
+    &--error { color: #ff5f7e; }
+    &--ok { color: $green; }
+  }
+
+  // ----- Existing trips -----
+  &__trips { max-width: 720px; margin: 2.5rem auto 0; }
+
+  &__trips-title {
+    font-family: $pixel-font;
+    color: $cyan;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+  }
+
+  &__trip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(110, 204, 238, 0.3);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.6rem;
+    background: rgba(20, 10, 30, 0.6);
+
+    span { font-size: 1rem; }
+    .meta { color: $green; font-size: 0.9rem; }
+  }
+
+  &__trip-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+  &__edit {
+    background: transparent;
+    border: 1px solid rgba(110, 204, 238, 0.6);
+    color: $cyan;
+    border-radius: 6px;
+    font-family: $pixel-font;
+    font-size: 1.05rem;
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+
+    &:hover { background: rgba(110, 204, 238, 0.15); }
+  }
+
+  &__delete {
+    background: transparent;
+    border: 1px solid #ff5f7e;
+    color: #ff5f7e;
+    border-radius: 6px;
+    font-family: $pixel-font;
+    font-size: 1.05rem;
+    padding: 0.3rem 0.8rem;
+    cursor: pointer;
+
+    &:hover { background: rgba(255, 95, 126, 0.15); }
+  }
+}
