@@ -25,7 +25,14 @@ if ($action === 'create' || $action === 'update') {
     if ($action === 'create') {
         $slug = make_slug($pdo, $title);
         $stmt = $pdo->prepare('INSERT INTO trips (slug, title, location, month, year) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute([$slug, $title, $location, $month, $year]);
+        // execute([...]) binds everything as a string, which MariaDB stores as 0
+        // for the numeric columns, so the ints are bound explicitly.
+        $stmt->bindValue(1, $slug);
+        $stmt->bindValue(2, $title);
+        $stmt->bindValue(3, $location);
+        $stmt->bindValue(4, $month, PDO::PARAM_INT);
+        $stmt->bindValue(5, $year, PDO::PARAM_INT);
+        $stmt->execute();
         $tripId = (int) $pdo->lastInsertId();
     } else {
         $tripId = (int) ($_GET['id'] ?? 0);
@@ -36,7 +43,12 @@ if ($action === 'create' || $action === 'update') {
         $before = trip_referenced_files($pdo, $tripId);
 
         $stmt = $pdo->prepare('UPDATE trips SET title = ?, location = ?, month = ?, year = ? WHERE id = ?');
-        $stmt->execute([$title, $location, $month, $year, $tripId]);
+        $stmt->bindValue(1, $title);
+        $stmt->bindValue(2, $location);
+        $stmt->bindValue(3, $month, PDO::PARAM_INT);
+        $stmt->bindValue(4, $year, PDO::PARAM_INT);
+        $stmt->bindValue(5, $tripId, PDO::PARAM_INT);
+        $stmt->execute();
 
         // Old trips may still hold legacy gallery rows; blocks now own the content.
         $pdo->prepare('DELETE FROM trip_blocks WHERE trip_id = ?')->execute([$tripId]);

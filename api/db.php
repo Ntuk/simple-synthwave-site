@@ -104,6 +104,15 @@ function trip_referenced_files(PDO $pdo, int $tripId): array {
     return array_values(array_unique(array_merge($a, $b)));
 }
 
+function insert_block(PDOStatement $s, int $tripId, int $position, string $type, ?string $text, ?string $filename): void {
+    $s->bindValue(1, $tripId, PDO::PARAM_INT);
+    $s->bindValue(2, $position, PDO::PARAM_INT);
+    $s->bindValue(3, $type);
+    $s->bindValue(4, $text, $text === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $s->bindValue(5, $filename, $filename === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $s->execute();
+}
+
 // Persist an ordered list of blocks for a trip and return the cover filename.
 // $blocks is the decoded JSON payload; $newFiles is the ordered list of
 // freshly uploaded filenames that image blocks reference by `imageRef` index.
@@ -119,7 +128,7 @@ function write_blocks(PDO $pdo, int $tripId, array $blocks, array $newFiles): ?s
             if ($text === '') {
                 continue;
             }
-            $insert->execute([$tripId, $position++, 'text', $text, null]);
+            insert_block($insert, $tripId, $position++, 'text', $text, null);
         } elseif ($type === 'image') {
             $filename = $block['filename'] ?? null;
             if ($filename === null && isset($block['imageRef'])) {
@@ -128,7 +137,7 @@ function write_blocks(PDO $pdo, int $tripId, array $blocks, array $newFiles): ?s
             if ($filename === null) {
                 continue;
             }
-            $insert->execute([$tripId, $position++, 'image', null, $filename]);
+            insert_block($insert, $tripId, $position++, 'image', null, $filename);
             if ($cover === null) {
                 $cover = $filename;
             }
