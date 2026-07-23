@@ -76,3 +76,9 @@ jobs:
           rsync -az --delete $EXTRA -e "$SSH_CMD" \
             --exclude 'config.php' \
             dist/api/ "${DEST}api/"
+
+          # opcache serves stale bytecode after a deploy, so bump the PHP file
+          # timestamps to force it to recompile on the next request.
+          if [ "$DRY_RUN" != "true" ]; then
+            $SSH_CMD "$SSH_USER@$SSH_HOST" "touch ${DEPLOY_PATH%/}/api/*.php"
+          fi
