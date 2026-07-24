@@ -43,6 +43,27 @@ function TravelDetail() {
       .catch(() => setStatus('error'));
   }, [slug]);
 
+  // Per-trip title and description. This helps browser tabs, bookmarks and
+  // Google (which renders JS). Facebook and LinkedIn do not run JS, so their
+  // cards still use the site-wide tags in index.html.
+  useEffect(() => {
+    if (!trip) return;
+    const prevTitle = document.title;
+    document.title = `${trip.title} — Travels — Nico Tukiainen`;
+
+    const meta = document.querySelector('meta[name="description"]');
+    const prevDesc = meta?.getAttribute('content') ?? '';
+    meta?.setAttribute(
+      'content',
+      `${trip.title}. ${trip.location}, ${formatMonthYear(trip.month, trip.year)}.`
+    );
+
+    return () => {
+      document.title = prevTitle;
+      meta?.setAttribute('content', prevDesc);
+    };
+  }, [trip]);
+
   useEffect(() => {
     if (lightboxIndex === null) return;
     const onKey = (e: KeyboardEvent) => {

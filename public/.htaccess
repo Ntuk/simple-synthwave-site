@@ -2,6 +2,9 @@
   RewriteEngine On
   RewriteBase /
 
+  # Generated from the trips table so new trips appear without editing a file.
+  RewriteRule ^sitemap\.xml$ api/sitemap.php [L]
+
   # Serve real files and directories as-is (assets, /api, /uploads, images).
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
@@ -45,4 +48,11 @@
   <FilesMatch "\.html$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
+
+  # Stop browsers guessing content types, keep the site out of other people's
+  # frames, and don't leak full URLs to third parties.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 </IfModule>

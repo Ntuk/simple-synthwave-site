@@ -222,6 +222,30 @@ $pixel-font: 'VT323', monospace;
     }
   }
 
+  &__card--skeleton {
+    pointer-events: none;
+
+    .travels__card-media {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .skeleton-line {
+      height: 0.85rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.07);
+
+      &--title { width: 65%; margin-bottom: 0.7rem; height: 1.1rem; }
+      &--meta { width: 40%; }
+    }
+
+    // One shared sweep so the placeholders pulse together rather than
+    // shimmering out of step with each other.
+    .travels__card-media,
+    .skeleton-line {
+      animation: skeleton-pulse 1.4s ease-in-out infinite;
+    }
+  }
+
   &__lightbox-close,
   &__lightbox-nav {
     position: absolute;
@@ -289,4 +313,9 @@ $pixel-font: 'VT323', monospace;
       width: 100%;
     }
   }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }

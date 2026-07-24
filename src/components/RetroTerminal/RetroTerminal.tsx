@@ -64,6 +64,7 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const matrixRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
   const bootTimerRef = useRef<number | undefined>(undefined);
+  const windowRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const welcomeMessage = `
@@ -164,6 +165,31 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   }, [isMinimized]);
 
   useEffect(() => () => clearTimeout(bootTimerRef.current), []);
+
+  // The terminal is a modal over the page, so keep Tab inside it. Without this
+  // you tab straight out into the nav links hidden behind the overlay.
+  useEffect(() => {
+    if (isMinimized) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const root = windowRef.current;
+      if (!root) return;
+      const items = [...root.querySelectorAll<HTMLElement>('button, input, [href], [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isMinimized]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
@@ -758,9 +784,13 @@ Example: theme hacker
     <div className={`retro-terminal theme-${theme}`}>
       <div className="terminal-overlay" onClick={() => setIsMinimized(true)} />
       <div
+        ref={windowRef}
         className={`terminal-window${isMaximized ? ' maximized' : ''}`}
         style={pos.x || pos.y ? { transform: `translate(${pos.x}px, ${pos.y}px)` } : undefined}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Interactive terminal"
       >
         <div
           className="terminal-header"

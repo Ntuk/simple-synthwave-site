@@ -29,7 +29,21 @@ function TravelsList() {
         <h1 className="travels__title">Travels</h1>
         <p className="travels__subtitle">places I've wandered</p>
 
-        {status === 'loading' && <div className="travels__state">loading trips...</div>}
+        {status === 'loading' && (
+          // Skeleton cards in the real grid, so the layout doesn't jump when
+          // the trips land.
+          <div className="travels__grid" aria-busy="true" aria-label="Loading trips">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="travels__card travels__card--skeleton">
+                <div className="travels__card-media" />
+                <div className="travels__card-body">
+                  <div className="skeleton-line skeleton-line--title" />
+                  <div className="skeleton-line skeleton-line--meta" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {status === 'error' && (
           <div className="travels__state travels__state--error">
             could not load trips. try again later.

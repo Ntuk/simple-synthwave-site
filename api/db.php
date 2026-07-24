@@ -71,7 +71,10 @@ function format_trip(PDO $pdo, array $t): array {
 
     $cover = null;
     if (!empty($t['cover'])) {
-        $cover = UPLOAD_URL . '/' . $t['cover'];
+        // Prefer the small thumbnail. Trips uploaded before thumbnails existed
+        // have none, so fall back to the full image.
+        $thumb = thumb_name($t['cover']);
+        $cover = UPLOAD_URL . '/' . (is_file(UPLOAD_DIR . '/' . $thumb) ? $thumb : $t['cover']);
     } else {
         foreach ($blocks as $b) {
             if ($b['type'] === 'image') {
@@ -169,6 +172,81 @@ function make_slug(PDO $pdo, string $title): string {
     }
 }
 
+// Long edge, in pixels, for the stored image and its list thumbnail.
+const MAX_IMAGE_EDGE = 1920;
+const THUMB_IMAGE_EDGE = 640;
+
+// Thumbnails live beside the original: photo.jpg -> photo_t.jpg.
+function thumb_name(string $name): string {
+    $dot = strrpos($name, '.');
+    return substr($name, 0, $dot) . '_t' . substr($name, $dot);
+}
+
+// Read an image, scale it so its long edge fits $maxEdge, and write it out.
+// Phones upload 4-6 MB originals that were being served to visitors untouched.
+function write_scaled(string $src, string $dest, string $mime, int $maxEdge, int $quality): bool {
+    if (!function_exists('imagecreatetruecolor')) {
+        return false;
+    }
+
+    $size = @getimagesize($src);
+    // A truecolour canvas costs ~4 bytes a pixel twice over, so bail on anything
+    // huge rather than exhaust memory_limit mid-request.
+    if (!$size || $size[0] * $size[1] > 40000000) {
+        return false;
+    }
+
+    switch ($mime) {
+        case 'image/jpeg': $im = @imagecreatefromjpeg($src); break;
+        case 'image/png':  $im = @imagecreatefrompng($src); break;
+        case 'image/webp': $im = @imagecreatefromwebp($src); break;
+        default: return false;
+    }
+    if (!$im) {
+        return false;
+    }
+
+    // Phone photos record rotation in EXIF rather than in the pixels, and GD
+    // drops that on re-encode, so apply it here or portraits come out sideways.
+    if ($mime === 'image/jpeg' && function_exists('exif_read_data')) {
+        $exif = @exif_read_data($src);
+        $orientation = $exif['Orientation'] ?? 0;
+        if ($orientation === 3) {
+            $im = imagerotate($im, 180, 0);
+        } elseif ($orientation === 6) {
+            $im = imagerotate($im, -90, 0);
+        } elseif ($orientation === 8) {
+            $im = imagerotate($im, 90, 0);
+        }
+    }
+
+    $w = imagesx($im);
+    $h = imagesy($im);
+    $scale = min(1, $maxEdge / max($w, $h));
+    $nw = max(1, (int) round($w * $scale));
+    $nh = max(1, (int) round($h * $scale));
+
+    $out = imagecreatetruecolor($nw, $nh);
+    if ($mime === 'image/png' || $mime === 'image/webp') {
+        imagealphablending($out, false);
+        imagesavealpha($out, true);
+    }
+    imagecopyresampled($out, $im, 0, 0, 0, 0, $nw, $nh, $w, $h);
+
+    $ok = false;
+    if ($mime === 'image/jpeg') {
+        $ok = imagejpeg($out, $dest, $quality);
+    } elseif ($mime === 'image/png') {
+        $ok = imagepng($out, $dest, 6);
+    } elseif ($mime === 'image/webp') {
+        $ok = imagewebp($out, $dest, $quality);
+    }
+
+    imagedestroy($im);
+    imagedestroy($out);
+    return $ok;
+}
+
 function save_uploads(): array {
     $saved = [];
     if (empty($_FILES['images'])) {
@@ -200,6 +278,11 @@ function save_uploads(): array {
         $name = bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
         $dest = UPLOAD_DIR . '/' . $name;
         if (move_uploaded_file($tmp, $dest)) {
+            // Downscale in place, then build the list thumbnail from the result.
+            // If GD is missing both calls no-op and the original is served, which
+            // is exactly the old behaviour.
+            write_scaled($dest, $dest, $mime, MAX_IMAGE_EDGE, 82);
+            write_scaled($dest, UPLOAD_DIR . '/' . thumb_name($name), $mime, THUMB_IMAGE_EDGE, 78);
             $saved[] = $name;
         }
     }
