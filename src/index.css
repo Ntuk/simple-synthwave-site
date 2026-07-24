@@ -6,7 +6,7 @@
   /* The site is dark by design, so don't let the OS flip it to a light theme. */
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #111;
+  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -51,7 +51,9 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  background-color: #111;
+  /* No background here on purpose. Hero.scss sets body to #333, which is the
+     hero's sky: the mountains and the vignette are only visible against it.
+     Setting one here is bundled later and silently flattens the scene. */
 }
 
 button {
