@@ -10,6 +10,10 @@
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
+  # Individual trips get the SPA shell with that trip's share metadata injected,
+  # because link previewers don't run the JavaScript that would set it.
+  RewriteRule ^travels/([A-Za-z0-9_-]+)/?$ api/share.php?slug=$1 [L,QSA]
+
   # Everything else is handled by the single-page app.
   RewriteRule ^ index.html [L]
 </IfModule>

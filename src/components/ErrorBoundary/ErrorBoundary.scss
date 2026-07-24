@@ -1,0 +1,63 @@
+.crash {
+  // body is a flex container, so a plain block collapses to content width.
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1.25rem;
+  background: #111;
+  font-family: 'VT323', monospace;
+  color: #f0f0f0;
+  text-align: center;
+
+  &__code {
+    margin: 0;
+    font-size: clamp(3.5rem, 16vmin, 8rem);
+    line-height: 1;
+    color: #f672ca;
+    text-shadow: 0 0 25px rgba(246, 114, 202, 0.7);
+  }
+
+  &__line,
+  &__msg {
+    margin: 0;
+    font-size: clamp(1rem, 2.5vmin, 1.4rem);
+  }
+
+  &__prompt {
+    color: #f672ca;
+    margin-right: 0.5rem;
+  }
+
+  &__msg { opacity: 0.7; }
+
+  &__actions {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 1rem;
+    font-size: clamp(1rem, 2.5vmin, 1.4rem);
+
+    button,
+    a {
+      background: none;
+      border: none;
+      border-bottom: 1px dotted currentColor;
+      padding: 0;
+      font: inherit;
+      color: #6eccee;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        color: #fff;
+        text-shadow: 0 0 10px #6eccee;
+      }
+    }
+  }
+}

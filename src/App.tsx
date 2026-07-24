@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.scss';
 import Home from './pages/Home';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import { initGA, pageview } from './utils/analytics';
 
 // Home is the landing page, so it stays in the main bundle. Everything else is
@@ -23,15 +24,19 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <Suspense fallback={null}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/travels" element={<TravelsList />} />
-        <Route path="/travels/:slug" element={<TravelDetail />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+    // Keyed on the path so navigating away from a crashed page recovers,
+    // instead of the error screen sticking for the rest of the session.
+    <ErrorBoundary key={location.pathname}>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/travels" element={<TravelsList />} />
+          <Route path="/travels/:slug" element={<TravelDetail />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

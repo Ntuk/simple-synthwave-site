@@ -25,13 +25,78 @@ function json_error(string $msg, int $code = 400): void {
     json_out(['error' => $msg], $code);
 }
 
-function require_admin(): void {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+// Start the session with the cookie flags set explicitly. Admin actions are
+// authorised by this cookie alone, so SameSite is what stops another site
+// POSTing to the API on your behalf.
+function start_session(): void {
+    if (session_status() !== PHP_SESSION_NONE) {
+        return;
     }
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'httponly' => true,
+        'secure' => $https,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+function require_admin(): void {
+    start_session();
     if (empty($_SESSION['admin'])) {
         json_error('Not authorized', 401);
     }
+}
+
+// ---- Login throttling -------------------------------------------------------
+// One password guards write access to the whole site, and the endpoint is
+// public, so cap how fast it can be guessed. State lives in a temp file per IP:
+// no schema change, and losing it on a server wipe is harmless.
+
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_WINDOW_SECONDS = 900;   // failures older than this stop counting
+const LOGIN_LOCKOUT_SECONDS = 900;  // how long a lockout lasts
+
+function login_state_file(): string {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    return sys_get_temp_dir() . '/nt_login_' . sha1($ip) . '.json';
+}
+
+function login_read_state(): array {
+    $raw = @file_get_contents(login_state_file());
+    $data = $raw === false ? null : json_decode($raw, true);
+    return is_array($data) ? $data : ['count' => 0, 'first' => 0, 'until' => 0];
+}
+
+// Refuses the request outright while a lockout is in force.
+function login_guard(): void {
+    $s = login_read_state();
+    if (($s['until'] ?? 0) > time()) {
+        $wait = $s['until'] - time();
+        header('Retry-After: ' . $wait);
+        json_error('Too many attempts. Try again in ' . ceil($wait / 60) . ' minutes.', 429);
+    }
+}
+
+function login_record_failure(): void {
+    $s = login_read_state();
+    $now = time();
+    if ($now - ($s['first'] ?? 0) > LOGIN_WINDOW_SECONDS) {
+        $s = ['count' => 0, 'first' => $now, 'until' => 0];
+    }
+    $s['count'] = ($s['count'] ?? 0) + 1;
+    if ($s['count'] >= LOGIN_MAX_ATTEMPTS) {
+        $s['until'] = $now + LOGIN_LOCKOUT_SECONDS;
+    }
+    @file_put_contents(login_state_file(), json_encode($s), LOCK_EX);
+}
+
+function login_clear_failures(): void {
+    @unlink(login_state_file());
 }
 
 // Returns the ordered content blocks for a trip. Trips created before the
