@@ -507,14 +507,27 @@
 }
 
 .cmd-chip {
+  // Reset the <button> chrome so it still reads as inline terminal text.
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 0;
+  padding: 0;
+  font: inherit;
   color: var(--terminal-highlight);
   cursor: pointer;
-  border-bottom: 1px dotted currentColor;
   transition: color 0.15s ease, text-shadow 0.15s ease;
 
   &:hover {
     color: #fff;
     text-shadow: 0 0 10px var(--terminal-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--terminal-highlight);
+    outline-offset: 2px;
+    color: #fff;
   }
 }
 

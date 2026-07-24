@@ -18,9 +18,11 @@ const COMMANDS = [
 
 const THEMES = ['synthwave', 'hacker', 'sunset', 'ocean'];
 
-// Renders a command as a clickable chip. The body's click handler picks these
-// up by their data-cmd attribute and runs them.
-const chip = (cmd: string, label = cmd) => `<span class="cmd-chip" data-cmd="${cmd}">${label}</span>`;
+// Renders a command as a clickable chip. A real <button> so it is reachable by
+// keyboard and announced as interactive. The body handler picks these up by
+// their data-cmd attribute and runs them.
+const chip = (cmd: string, label = cmd) =>
+  `<button type="button" class="cmd-chip" data-cmd="${cmd}">${label}</button>`;
 
 const commonPrefix = (words: string[]): string => {
   if (!words.length) return '';
@@ -192,7 +194,9 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
         setHistoryIndex(next);
         setInput(history[next].command);
       }
-    } else if (e.key === 'Tab') {
+    } else if (e.key === 'Tab' && !e.shiftKey && input.trim()) {
+      // Only swallow Tab when there is something to complete. On an empty
+      // prompt it has to move focus, or keyboard users are trapped here.
       e.preventDefault();
       completeInput();
     }

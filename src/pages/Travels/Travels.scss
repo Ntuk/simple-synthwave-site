@@ -218,6 +218,75 @@ $pixel-font: 'VT323', monospace;
       max-height: 100%;
       border-radius: 8px;
       box-shadow: 0 0 40px rgba(255, 0, 170, 0.5);
+      cursor: default;
+    }
+  }
+
+  &__lightbox-close,
+  &__lightbox-nav {
+    position: absolute;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(246, 114, 202, 0.5);
+    color: $pink;
+    font-family: $pixel-font;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+
+    &:hover {
+      color: #fff;
+      border-color: $pink;
+      background: rgba(246, 114, 202, 0.2);
+    }
+  }
+
+  &__lightbox-close {
+    top: 1rem;
+    right: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.9rem;
+  }
+
+  &__lightbox-nav {
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 4.5rem;
+    font-size: 2.6rem;
+
+    &--prev { left: 1rem; }
+    &--next { right: 1rem; }
+  }
+
+  &__lightbox-count {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: $pixel-font;
+    font-size: 1.2rem;
+    color: $cyan;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 0.2rem 0.8rem;
+    border-radius: 6px;
+  }
+
+  // The photo itself is a button so it is reachable by keyboard, but it should
+  // still look like a bare image.
+  &__image-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+
+    img {
+      display: block;
+      width: 100%;
     }
   }
 }

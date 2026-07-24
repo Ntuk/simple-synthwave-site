@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import TravelsList from './pages/Travels/TravelsList';
 import TravelDetail from './pages/Travels/TravelDetail';
 import Admin from './pages/Admin/Admin';
+import NotFound from './pages/NotFound';
 import { initGA, pageview } from './utils/analytics';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <Route path="/travels" element={<TravelsList />} />
       <Route path="/travels/:slug" element={<TravelDetail />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

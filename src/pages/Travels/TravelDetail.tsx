@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Trip, formatMonthYear } from '../../types/trip';
 import { fetchTrip } from '../../api/trips';
@@ -9,7 +9,28 @@ function TravelDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  // Track the photo by index so the lightbox can step through them.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  const photos = trip?.blocks.filter(b => b.type === 'image' && b.url) ?? [];
+  const lightbox = lightboxIndex === null ? null : photos[lightboxIndex]?.url ?? null;
+
+  const openLightbox = (url: string, el: HTMLElement) => {
+    openerRef.current = el;
+    setLightboxIndex(photos.findIndex(p => p.url === url));
+  };
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    // Put the caret back where it came from instead of dumping it at the top.
+    openerRef.current?.focus();
+  };
+
+  const step = (dir: number) => {
+    setLightboxIndex(i => (i === null ? i : (i + dir + photos.length) % photos.length));
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -23,12 +44,25 @@ function TravelDetail() {
   }, [slug]);
 
   useEffect(() => {
+    if (lightboxIndex === null) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLightbox(null);
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowRight') step(1);
+      else if (e.key === 'ArrowLeft') step(-1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [lightboxIndex, photos.length]);
+
+  // Move focus into the dialog so Escape and the arrows reach it, and stop the
+  // page behind from scrolling while it is open.
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    closeBtnRef.current?.focus();
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [lightboxIndex]);
 
   return (
     <>
@@ -57,12 +91,14 @@ function TravelDetail() {
                   <p key={i} className="travels__text">{block.text}</p>
                 ) : (
                   <figure key={i} className="travels__image">
-                    <img
-                      src={block.url}
-                      alt={trip.title}
-                      loading="lazy"
-                      onClick={() => block.url && setLightbox(block.url)}
-                    />
+                    <button
+                      type="button"
+                      className="travels__image-btn"
+                      onClick={(e) => block.url && openLightbox(block.url, e.currentTarget)}
+                      aria-label={`Open photo ${photos.findIndex(p => p.url === block.url) + 1} of ${photos.length} from ${trip.title}`}
+                    >
+                      <img src={block.url} alt="" loading="lazy" />
+                    </button>
                   </figure>
                 )
               )}
@@ -72,8 +108,51 @@ function TravelDetail() {
       </div>
 
       {lightbox && (
-        <div className="travels__lightbox" onClick={() => setLightbox(null)}>
-          <img src={lightbox} alt="" />
+        <div
+          className="travels__lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo ${(lightboxIndex ?? 0) + 1} of ${photos.length}`}
+          onClick={closeLightbox}
+        >
+          <button
+            ref={closeBtnRef}
+            type="button"
+            className="travels__lightbox-close"
+            onClick={closeLightbox}
+            aria-label="Close photo"
+          >
+            ×
+          </button>
+
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="travels__lightbox-nav travels__lightbox-nav--prev"
+                onClick={(e) => { e.stopPropagation(); step(-1); }}
+                aria-label="Previous photo"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="travels__lightbox-nav travels__lightbox-nav--next"
+                onClick={(e) => { e.stopPropagation(); step(1); }}
+                aria-label="Next photo"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          <img src={lightbox} alt={`${trip?.title ?? 'Trip'} photo`} onClick={(e) => e.stopPropagation()} />
+
+          {photos.length > 1 && (
+            <div className="travels__lightbox-count">
+              {(lightboxIndex ?? 0) + 1} / {photos.length}
+            </div>
+          )}
         </div>
       )}
     </>
