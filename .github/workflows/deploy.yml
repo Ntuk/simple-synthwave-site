@@ -59,3 +59,14 @@ jobs:
           exclude: |
             **/.git*
             **/.git*/**
+
+      # Most of the server-side behaviour here can't be exercised in CI before
+      # it ships, so verify it against the real site straight after upload. A
+      # broken share.php or a half-finished upload shows up as a red X rather
+      # than as a blank page someone notices days later.
+      - name: Smoke test the live site
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          # Give the last FTP writes a moment to settle before probing.
+          sleep 10
+          bash scripts/smoke.sh https://nicotukiainen.com
