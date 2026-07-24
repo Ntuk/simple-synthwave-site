@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, forwardRef, useImperativeHandle, Fragment 
 import { useNavigate } from 'react-router-dom';
 import TypingEffect from '../TypingEffect/TypingEffect';
 import { FaTerminal } from 'react-icons/fa';
+import nicoPhoto from '../../assets/nico.jpg';
 import './RetroTerminal.scss';
 import { event } from '../../utils/analytics';
 
@@ -17,6 +18,9 @@ const COMMANDS = [
 ];
 
 const THEMES = ['synthwave', 'hacker', 'sunset', 'ocean'];
+
+// The handful worth surfacing permanently. `help` still lists everything.
+const STATUS_COMMANDS = ['help', 'about', 'skills', 'projects', 'travels', 'contact'];
 
 // Renders a command as a clickable chip. A real <button> so it is reachable by
 // keyboard and announced as interactive. The body handler picks these up by
@@ -237,13 +241,17 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
 
     const target = (e.target as HTMLElement).closest('[data-cmd]');
     const cmd = target?.getAttribute('data-cmd');
-    if (cmd) {
-      settleOutput();
-      processCommand(cmd);
-      setInput('');
-      setHistoryIndex(-1);
-    }
+    if (cmd) runCommand(cmd);
 
+    inputRef.current?.focus();
+  };
+
+  // Shared by the inline chips and the status bar along the bottom.
+  const runCommand = (cmd: string) => {
+    settleOutput();
+    processCommand(cmd);
+    setInput('');
+    setHistoryIndex(-1);
     inputRef.current?.focus();
   };
 
@@ -373,7 +381,7 @@ Available commands: <span class="help-tip">(click one, or press Tab to complete)
 `;
       case 'about':
         return `
-<span class="header-green">[SYSTEM SCAN COMPLETE]</span>
+<span class="dossier"><span class="mugshot"><img src="${nicoPhoto}" alt="Nico Tukiainen" width="360" height="360"></span><span class="header-green">[SYSTEM SCAN COMPLETE]</span>
 > Identifying: NICO TUKIAINEN
 > Status: ONLINE
 > Generation: 1986 Model
@@ -386,7 +394,7 @@ Available commands: <span class="help-tip">(click one, or press Tab to complete)
 
 <span class="header-green">[EDUCATION MODULES]</span>
 > Bachelor.exe successfully executed at Haaga-Helia University of Applied Sciences
-> Master.exe currently loading... [===>      ] at Oulu University of Applied Sciences
+> Master.exe currently loading... [========> ] at Oulu University of Applied Sciences
 
 <span class="header-green">[RUNTIME ACTIVITIES]</span>
 When not optimizing code or debugging the matrix, this unit can be found:
@@ -394,8 +402,9 @@ When not optimizing code or debugging the matrix, this unit can be found:
 > Running travel_adventures.exe with wife.instance
 > Exploring new tech_stacks.json
 > Rendering pixel worlds in godot_engine.gd
+> Running one_more_game.exe until wife.instance raises a complaint
 
-<span class="header-green">[END TRANSMISSION]</span>
+<span class="header-green">[END TRANSMISSION]</span></span>
 `;
       case 'skills':
         return `
@@ -834,6 +843,35 @@ Example: theme hacker
               spellCheck={false}
             />
             <span className="cursor-block"></span>
+            {/* Sits after the cursor rather than using a native placeholder,
+                which would need input width the block cursor can't share. */}
+            {!input && <span className="prompt-hint">type a command, or click one below</span>}
+          </div>
+        </div>
+
+        {/* Pinned outside the scrolling body: once output runs past a screen,
+            the banner at the top is gone and there is nothing left telling you
+            what to type or how to get out. */}
+        <div className="terminal-statusbar">
+          <div className="terminal-statusbar__cmds">
+            {STATUS_COMMANDS.map(c => (
+              <button
+                key={c}
+                type="button"
+                className="cmd-chip"
+                data-cmd={c}
+                onClick={() => runCommand(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <div className="terminal-statusbar__keys">
+            <span><kbd>tab</kbd> complete</span>
+            <span><kbd>↑</kbd> history</span>
+            <button type="button" className="cmd-chip" onClick={() => setIsMinimized(true)}>
+              <kbd>esc</kbd> close
+            </button>
           </div>
         </div>
       </div>

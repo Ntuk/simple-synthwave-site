@@ -384,16 +384,33 @@
         font-family: 'VT323', monospace;
         margin: 0;
         white-space: pre-wrap;
-        
+
         @media (max-width: 480px) {
           font-size: 14px;
         }
       }
+
+      // TypingEffect wraps output in an inline-flex box, so the <pre> is
+      // shrink-to-fit and its right edge creeps outward with every character
+      // typed. Anything floated right rides along with it. Make responses
+      // full-width instead so that edge holds still. The trailing cursor goes
+      // with it, which is fine here: the prompt below has its own.
+      .typing-container,
+      .typing-effect {
+        display: block;
+        width: 100%;
+      }
+
+      .cursor {
+        display: none;
+      }
     }
-    
+
     .terminal-input-line {
       display: flex;
       align-items: center;
+      // The hint is nowrap, so clip rather than let it widen the line.
+      overflow: hidden;
 
       .terminal-input {
         flex: 0 1 auto;
@@ -430,6 +447,79 @@
         box-shadow: 0 0 8px var(--terminal-prompt);
         animation: cursor-blink 1.1s steps(1) infinite;
       }
+
+      .prompt-hint {
+        margin-left: 0.9em;
+        opacity: 0.35;
+        white-space: nowrap;
+        pointer-events: none;
+
+        @media (max-width: 600px) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // Always-visible command bar, the way nano keeps its shortcuts pinned. Lives
+  // outside .terminal-body so it never scrolls away with the output.
+  .terminal-statusbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 6px 12px;
+    border-top: 1px solid var(--terminal-border);
+    background: rgba(0, 0, 0, 0.45);
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    z-index: 4;
+
+    @media (min-width: 1200px) {
+      font-size: 17px;
+    }
+
+    // One row, always. Wrapping turned the bar into a 200px block on a narrow
+    // window, so overflow scrolls sideways instead.
+    flex-wrap: nowrap;
+
+    &__cmds {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar { display: none; }
+    }
+
+    &__keys {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      white-space: nowrap;
+      color: var(--terminal-text);
+      opacity: 0.55;
+
+      // The command chips matter more than the key hints when space is tight.
+      @media (max-width: 720px) {
+        span { display: none; }
+      }
+    }
+
+    kbd {
+      font-family: inherit;
+      font-size: 0.95em;
+      padding: 0 0.35em;
+      border: 1px solid currentColor;
+      border-radius: 3px;
+      opacity: 0.8;
+    }
+
+    .cmd-chip {
+      border-bottom: none;
     }
   }
 
@@ -534,6 +624,61 @@
 .help-tip {
   opacity: 0.55;
   font-size: 0.85em;
+}
+
+// Caps the `about` readout just past its longest line so the floated photo
+// lands next to the text instead of way out at the terminal's right edge.
+// ch units are exact here because the whole terminal is monospace.
+.dossier {
+  display: block;
+  max-width: 88ch;
+}
+
+// Dossier photo in the `about` output, pushed through the same scanlines as the
+// rest of the screen so it reads as part of the CRT rather than pasted on top.
+// Floated right on purpose: floating left indents the first few lines and
+// breaks the left-hand column every other line in the readout lines up on.
+.mugshot {
+  float: right;
+  position: relative;
+  width: clamp(88px, 20%, 150px);
+  margin: 0.15rem 0 0.35rem 1.1rem;
+  line-height: 0;
+  border: 1px solid var(--terminal-prompt);
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.6), 0 0 14px var(--terminal-border);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: contrast(1.18) saturate(0.75) brightness(1.06);
+  }
+
+  // Colour wash to pull the photo into whichever theme is active. soft-light
+  // tints it without flattening the face to grey the way `color` does.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, var(--terminal-prompt), var(--terminal-highlight));
+    mix-blend-mode: soft-light;
+    opacity: 0.32;
+    pointer-events: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.22),
+      rgba(0, 0, 0, 0.22) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+  }
 }
 
 .boot-ok {
