@@ -1,14 +1,35 @@
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TypingEffect from '../TypingEffect/TypingEffect';
 import { FaTerminal } from 'react-icons/fa';
 import './RetroTerminal.scss';
 import { event } from '../../utils/analytics';
 
-interface CommandResponse {
+interface HistoryEntry {
+  command: string;
   text: string | JSX.Element;
   isTyping: boolean;
 }
+
+const COMMANDS = [
+  'about', 'skills', 'projects', 'travels', 'contact',
+  'matrix', 'game', 'theme', 'clear', 'exit', 'help',
+];
+
+const THEMES = ['synthwave', 'hacker', 'sunset', 'ocean'];
+
+// Renders a command as a clickable chip. The body's click handler picks these
+// up by their data-cmd attribute and runs them.
+const chip = (cmd: string, label = cmd) => `<span class="cmd-chip" data-cmd="${cmd}">${label}</span>`;
+
+const commonPrefix = (words: string[]): string => {
+  if (!words.length) return '';
+  let prefix = words[0];
+  for (const w of words) {
+    while (!w.startsWith(prefix)) prefix = prefix.slice(0, -1);
+  }
+  return prefix;
+};
 
 export interface RetroTerminalHandle {
   executeCommand: (cmd: string) => void;
@@ -16,10 +37,15 @@ export interface RetroTerminalHandle {
 
 const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const [input, setInput] = useState('');
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [responses, setResponses] = useState<CommandResponse[]>([]);
+  // One entry per command keeps each response directly under the line that
+  // produced it. Two parallel lists drifted apart after the first command.
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [isWelcomeTyping, setIsWelcomeTyping] = useState(true);
+  const [bootPhase, setBootPhase] = useState<'booting' | 'done'>('booting');
   const [isMinimized, setIsMinimized] = useState(true);
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
   const [isMatrixRunning, setIsMatrixRunning] = useState(false);
   const [gameActive, setGameActive] = useState(false);
   const [secretNumber, setSecretNumber] = useState(0);
@@ -30,12 +56,24 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const terminalRef = useRef<HTMLDivElement>(null);
   const matrixRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+  const bootTimerRef = useRef<number | undefined>(undefined);
   const navigate = useNavigate();
 
   const welcomeMessage = `
+> BOOT SEQUENCE INITIATED
+> POST .......................... <span class="boot-ok">OK</span>
+> MEM CHECK 65536 KB ............ <span class="boot-ok">OK</span>
+> SYNTHWAVE DRIVER v8.6 ......... <span class="boot-ok">OK</span>
+> MOUNTING /dev/retrowave ....... <span class="boot-ok">OK</span>
+> NICO_TUKIAINEN.EXE ............ <span class="boot-ok">OK</span>
+
 > WELCOME TO NICO'S TERMINAL v1.0
-> TYPE 'help' TO SEE AVAILABLE COMMANDS
+> TYPE ${chip('help')} TO SEE AVAILABLE COMMANDS
 `;
+
+  // What the boot collapses into, so the banner costs one line instead of eight.
+  const bannerMessage = `NICO_TUKIAINEN.EXE v1.0 — type ${chip('help')} for commands`;
 
   useEffect(() => {
     // Check if device is mobile
@@ -66,16 +104,17 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [responses, commandHistory]);
+  }, [history]);
 
   useImperativeHandle(ref, () => ({
     executeCommand: (cmd: string) => {
       setIsMinimized(false);
       // Clear previous commands and responses
-      setResponses([]);
-      setCommandHistory([]);
-      // Don't show welcome message when executing commands from links
+      setHistory([]);
+      setHistoryIndex(-1);
+      // Straight to the compact banner when a nav link opens the terminal.
       setIsWelcomeTyping(false);
+      setBootPhase('done');
       // Add a small delay before executing the new command
       setTimeout(() => {
         processCommand(cmd);
@@ -83,40 +122,171 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
     }
   }));
 
+  // Hold the finished boot on screen just long enough to read, then collapse it.
   const handleWelcomeComplete = () => {
     setIsWelcomeTyping(false);
+    clearTimeout(bootTimerRef.current);
+    bootTimerRef.current = window.setTimeout(() => setBootPhase('done'), 700);
   };
+
+  // Finish every in-flight response immediately. Returning the same array when
+  // nothing was typing keeps this from forcing a needless re-render.
+  const settleOutput = () => {
+    setIsWelcomeTyping(false);
+    clearTimeout(bootTimerRef.current);
+    setBootPhase('done');
+    setHistory(prev =>
+      prev.some(h => h.isTyping) ? prev.map(h => ({ ...h, isTyping: false })) : prev
+    );
+  };
+
+  // Opening the terminal gives you a clean session. Window preferences (theme,
+  // position, maximised) deliberately survive; scrollback and game state do not.
+  const resetSession = () => {
+    setHistory([]);
+    setHistoryIndex(-1);
+    setInput('');
+    setGameActive(false);
+    setGuessCount(0);
+    setIsWelcomeTyping(true);
+    setBootPhase('booting');
+  };
+
+  // Stop the matrix however the terminal was closed, not just via the icon.
+  useEffect(() => {
+    if (isMinimized) setIsMatrixRunning(false);
+  }, [isMinimized]);
+
+  useEffect(() => () => clearTimeout(bootTimerRef.current), []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Any real keypress dumps the rest of a still-typing response, so long
+    // output like 'skills' never holds you hostage for ten seconds.
+    const isModifier = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(e.key);
+    if (!isModifier) settleOutput();
+
     if (e.key === 'Enter' && input.trim()) {
       processCommand(input.trim());
       setInput('');
+      setHistoryIndex(-1);
     } else if (e.key === 'Escape') {
       setIsMinimized(true);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!history.length) return;
+      const next = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
+      setHistoryIndex(next);
+      setInput(history[next].command);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex === -1) return;
+      const next = historyIndex + 1;
+      if (next >= history.length) {
+        setHistoryIndex(-1);
+        setInput('');
+      } else {
+        setHistoryIndex(next);
+        setInput(history[next].command);
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      completeInput();
     }
   };
 
+  // Shell-style Tab completion: a single match fills in, several complete as
+  // far as they agree and then list themselves.
+  const completeInput = () => {
+    const partial = input.toLowerCase();
+    if (!partial.trim()) return;
+
+    // 'theme ' completes theme names rather than commands.
+    const themeArg = partial.match(/^theme\s+(\S*)$/);
+    const [pool, prefix] = themeArg
+      ? [THEMES, themeArg[1]]
+      : [COMMANDS, partial.trimStart()];
+
+    const matches = pool.filter(c => c.startsWith(prefix));
+    if (!matches.length) return;
+
+    const completed = matches.length === 1 ? matches[0] : commonPrefix(matches);
+    setInput(themeArg ? `theme ${completed}` : completed);
+
+    if (matches.length > 1) {
+      setHistory(prev => [...prev, {
+        command: input,
+        text: matches.map(m => chip(m)).join('   '),
+        isTyping: false,
+      }]);
+    }
+  };
+
+  // Clicking anywhere in the output puts the caret back in the input, unless
+  // you were selecting text or clicking a link.
+  const handleBodyClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a')) return;
+    if (window.getSelection()?.toString()) return;
+
+    const target = (e.target as HTMLElement).closest('[data-cmd]');
+    const cmd = target?.getAttribute('data-cmd');
+    if (cmd) {
+      settleOutput();
+      processCommand(cmd);
+      setInput('');
+      setHistoryIndex(-1);
+    }
+
+    inputRef.current?.focus();
+  };
+
+  const startDrag = (e: React.PointerEvent) => {
+    if (isMaximized) return;
+    if ((e.target as HTMLElement).closest('.terminal-button')) return;
+    dragRef.current = { startX: e.clientX, startY: e.clientY, originX: pos.x, originY: pos.y };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    // The window is flex-centered, so pos is an offset from centre. Clamp it so
+    // the header can never be dragged fully off-screen.
+    const maxX = window.innerWidth / 2 - 80;
+    const maxY = window.innerHeight / 2 - 40;
+    setPos({
+      x: Math.max(-maxX, Math.min(maxX, d.originX + e.clientX - d.startX)),
+      y: Math.max(-maxY, Math.min(maxY, d.originY + e.clientY - d.startY)),
+    });
+  };
+
+  const endDrag = (e: React.PointerEvent) => {
+    dragRef.current = null;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  const toggleMaximize = () => {
+    setPos({ x: 0, y: 0 });
+    setIsMaximized(prev => !prev);
+  };
+
   const toggleTerminal = () => {
+    const opening = isMinimized;
     setIsMinimized(!isMinimized);
     setHasClickedTerminal(true);
-    
+
     // Track terminal toggle event
     event({
-      action: isMinimized ? 'open' : 'close',
+      action: opening ? 'open' : 'close',
       category: 'terminal',
       label: 'user_interaction'
     });
-    
-    if (!isMinimized) {
-      // If we're minimizing, stop any matrix effect
-      if (isMatrixRunning) {
-        setIsMatrixRunning(false);
-      }
-    } else {
+
+    if (opening) {
+      resetSession();
       // Focus the input when terminal is opened
       setTimeout(() => {
         inputRef.current?.focus();
@@ -132,19 +302,16 @@ const RetroTerminal = forwardRef<RetroTerminalHandle>((_, ref) => {
       label: cmd.toLowerCase()
     });
     
-    // Add command to history
-    setCommandHistory(prev => [...prev, cmd]);
+    const push = (text: string | JSX.Element) =>
+      setHistory(prev => [...prev, { command: cmd, text, isTyping: true }]);
 
     // Check if we're in a game
     if (gameActive && cmd.toLowerCase() !== 'quit game') {
       // Try to parse the input as a number
       const guess = parseInt(cmd);
-      
+
       if (isNaN(guess)) {
-        setResponses(prev => [...prev, { 
-          text: "That's not a valid number. Try again or type 'quit game' to exit.",
-          isTyping: true 
-        }]);
+        push("That's not a valid number. Try again or type 'quit game' to exit.");
         return;
       }
       
@@ -168,49 +335,37 @@ Game over. Type 'game' to play again.
 `;
         setGameActive(false);
       }
-      
-      setResponses(prev => [...prev, { 
-        text: response,
-        isTyping: true 
-      }]);
+
+      push(response);
       return;
     }
-    
+
     // Handle "quit game" command
     if (cmd.toLowerCase() === 'quit game' && gameActive) {
       setGameActive(false);
-      setResponses(prev => [...prev, { 
-        text: `Game aborted. The number was ${secretNumber}.`,
-        isTyping: true 
-      }]);
+      push(`Game aborted. The number was ${secretNumber}.`);
       return;
     }
 
     // Process regular command and get response
-    const response = getCommandResponse(cmd.toLowerCase());
-    
-    // Add response with typing effect
-    setResponses(prev => [...prev, { 
-      text: response,
-      isTyping: true 
-    }]);
+    push(getCommandResponse(cmd.toLowerCase()));
   };
 
   const getCommandResponse = (cmd: string): string => {
     switch (cmd) {
       case 'help':
         return `
-Available commands:
-- about: Learn about Nico
-- skills: See my technical skills
-- projects: View my projects
-- travels: Browse my travel blog
-- contact: How to reach me
-- matrix: Activate the matrix
-- game: Play a number guessing game
-- theme: Change color theme (synthwave, hacker, sunset, ocean)
-- clear: Clear the terminal
-- exit: Minimize this terminal
+Available commands: <span class="help-tip">(click one, or press Tab to complete)</span>
+- ${chip('about')}: Learn about Nico
+- ${chip('skills')}: See my technical skills
+- ${chip('projects')}: View my projects
+- ${chip('travels')}: Browse my travel blog
+- ${chip('contact')}: How to reach me
+- ${chip('matrix')}: Activate the matrix
+- ${chip('game')}: Play a number guessing game
+- ${chip('theme')}: Change color theme (${THEMES.map(t => chip(`theme ${t}`, t)).join(', ')})
+- ${chip('clear')}: Clear the terminal
+- ${chip('exit')}: Minimize this terminal
 `;
       case 'about':
         return `
@@ -297,15 +452,15 @@ When not optimizing code or debugging the matrix, this unit can be found:
 ==================================
 
 Notable Projects:
-<span class="project-number">1.</span> Pondemonium - 2D puzzle-platformer released on Steam
-<span class="project-number">2.</span> Smart Recipe Meal Planner - AI-powered meal suggestions
-<span class="project-number">3.</span> Crypto Trading Bot - Automated trading system
-<span class="project-number">4.</span> Coinbase API Proxy - Secure AWS Lambda middleware
-<span class="project-number">5.</span> Simple Synthwave Site - This retro portfolio
-<span class="project-number">6.</span> Hiljaisen Sillan Kennel - Modern kennel website
-<span class="project-number">7.</span> AFPS Finland - Gaming community platform
+<span class="project-number">1.</span> ${chip('project 1', 'Pondemonium')} - 2D puzzle-platformer released on Steam
+<span class="project-number">2.</span> ${chip('project 2', 'Smart Recipe Meal Planner')} - AI-powered meal suggestions
+<span class="project-number">3.</span> ${chip('project 3', 'Crypto Trading Bot')} - Automated trading system
+<span class="project-number">4.</span> ${chip('project 4', 'Coinbase API Proxy')} - Secure AWS Lambda middleware
+<span class="project-number">5.</span> ${chip('project 5', 'Simple Synthwave Site')} - This retro portfolio
+<span class="project-number">6.</span> ${chip('project 6', 'Hiljaisen Sillan Kennel')} - Modern kennel website
+<span class="project-number">7.</span> ${chip('project 7', 'AFPS Finland')} - Gaming community platform
 
-Type 'project 1', 'project 2', etc. for more details.
+Click a project, or type 'project 1', 'project 2', etc. for more details.
 <span class="header-green">[END DATABASE]</span>
 `;
       case 'project 1':
@@ -427,8 +582,8 @@ Opening the travel blog.
       case 'clear':
         // Clear the terminal
         setTimeout(() => {
-          setResponses([]);
-          setCommandHistory([]);
+          setHistory([]);
+          setHistoryIndex(-1);
         }, 100);
         return 'Clearing terminal...';
       case 'exit':
@@ -511,9 +666,9 @@ Example: theme hacker
   };
 
   const handleResponseComplete = (index: number) => {
-    setResponses(prev => 
-      prev.map((resp, i) => 
-        i === index ? { ...resp, isTyping: false } : resp
+    setHistory(prev =>
+      prev.map((entry, i) =>
+        i === index ? { ...entry, isTyping: false } : entry
       )
     );
   };
@@ -589,58 +744,75 @@ Example: theme hacker
   return (
     <div className={`retro-terminal theme-${theme}`}>
       <div className="terminal-overlay" onClick={() => setIsMinimized(true)} />
-      <div className="terminal-window" onClick={(e) => e.stopPropagation()}>
-        <div className="terminal-header">
+      <div
+        className={`terminal-window${isMaximized ? ' maximized' : ''}`}
+        style={pos.x || pos.y ? { transform: `translate(${pos.x}px, ${pos.y}px)` } : undefined}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="terminal-header"
+          onPointerDown={startDrag}
+          onPointerMove={onDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onDoubleClick={toggleMaximize}
+        >
           <div className="terminal-buttons">
             <div className="terminal-button close" onClick={() => setIsMinimized(true)}></div>
             <div className="terminal-button minimize" onClick={() => setIsMinimized(true)}></div>
-            <div className="terminal-button maximize"></div>
+            <div className="terminal-button maximize" onClick={toggleMaximize}></div>
           </div>
           <div className="terminal-title">NICO_TUKIAINEN.EXE</div>
         </div>
-        
-        <div className="terminal-body" ref={terminalRef}>
+
+        <div className="crt-roll"></div>
+
+        <div className="terminal-body" ref={terminalRef} onClick={handleBodyClick}>
           {isMatrixRunning && (
             <div className="matrix-container" ref={matrixRef}></div>
           )}
           
           <div className="terminal-welcome">
-            {isWelcomeTyping ? (
-              <TypingEffect 
-                text={welcomeMessage} 
-                speed={20} 
-                onComplete={handleWelcomeComplete} 
-              />
+            {bootPhase === 'booting' ? (
+              isWelcomeTyping ? (
+                <TypingEffect
+                  text={welcomeMessage}
+                  speed={12}
+                  chunkSize={3}
+                  onComplete={handleWelcomeComplete}
+                />
+              ) : (
+                <pre dangerouslySetInnerHTML={{ __html: welcomeMessage }}></pre>
+              )
             ) : (
-              <pre>{welcomeMessage}</pre>
+              <pre className="terminal-banner" dangerouslySetInnerHTML={{ __html: bannerMessage }}></pre>
             )}
           </div>
           
-          {commandHistory.map((cmd, index) => (
-            <div key={`cmd-${index}`} className="terminal-line">
-              <span className="prompt">guest@retrowave:~$</span> {cmd}
-            </div>
-          ))}
-          
-          {responses.map((response, index) => (
-            <div key={`resp-${index}`} className="terminal-response">
-              {response.isTyping && typeof response.text === 'string' ? (
-                <TypingEffect 
-                  text={response.text} 
-                  speed={3} 
-                  delay={25} 
-                  onComplete={() => handleResponseComplete(index)} 
-                />
-              ) : (
-                typeof response.text === 'string' ? (
-                  <pre dangerouslySetInnerHTML={{ __html: response.text }}></pre>
+          {history.map((entry, index) => (
+            <Fragment key={index}>
+              <div className="terminal-line">
+                <span className="prompt">guest@retrowave:~$</span> {entry.command}
+              </div>
+              <div className="terminal-response">
+                {entry.isTyping && typeof entry.text === 'string' ? (
+                  <TypingEffect
+                    text={entry.text}
+                    speed={3}
+                    delay={25}
+                    onComplete={() => handleResponseComplete(index)}
+                  />
                 ) : (
-                  response.text
-                )
-              )}
-            </div>
+                  typeof entry.text === 'string' ? (
+                    <pre dangerouslySetInnerHTML={{ __html: entry.text }}></pre>
+                  ) : (
+                    entry.text
+                  )
+                )}
+              </div>
+            </Fragment>
           ))}
-          
+
           <div className="terminal-input-line">
             <span className="prompt">guest@retrowave:~$</span>
             <input
@@ -650,8 +822,14 @@ Example: theme hacker
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               className="terminal-input"
+              // VT323 is monospace, so sizing the field to its content in ch
+              // lets the block cursor sit flush against the last character.
+              style={{ width: `${input.length + 1}ch` }}
               autoFocus
+              autoComplete="off"
+              spellCheck={false}
             />
+            <span className="cursor-block"></span>
           </div>
         </div>
       </div>
